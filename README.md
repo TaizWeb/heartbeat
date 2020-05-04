@@ -31,5 +31,5 @@ Short answer: Yes. Long Answer: It depends on what you define as usable. As of r
 
 **Will there be a luarocks package?**
 
-I'm fully open to it. However, I personally don't use luarocks myself, so I have no idea the logistics behind submitting it and getting it approved. When I last used luarocks, I encountered numerous issues with it, so even if a rock _did_ exist someday, I'd still recommend directly copying the `lib/` files directly to your project.
+I'm fully open to it. However, I personally don't use luarocks myself, so I have no idea the logistics behind submitting it and getting it approved. When I last used luarocks, I encountered numerous issues with it, so even if a rock _did_ exist someday, I'd still recommend copying the `lib/` files directly to your project.
 
