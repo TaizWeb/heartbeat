@@ -1,5 +1,5 @@
-require("camera")
-require("split")
+require("lib/camera")
+require("lib/split")
 
 Heartbeat = {
 	gravity = .5,
