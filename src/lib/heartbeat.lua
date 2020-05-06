@@ -23,10 +23,10 @@ function Heartbeat.draw(object)
 end
 
 -- createPlayer: Creates the player object and loads it into Heartbeat
-function Heartbeat.createPlayer(object)
+function Heartbeat.createPlayer(object, x, y)
 	Heartbeat.player = {
-		x = object.x,
-		y = object.y,
+		x = x,
+		y = y,
 		dx = 0,
 		dy = 0,
 		height = object.height,
@@ -55,11 +55,11 @@ function Heartbeat.doPlayer()
 end
 
 -- newEntity: Initializes and loads the entity into Heartbeat
-function Heartbeat.newEntity(object)
+function Heartbeat.newEntity(object, x, y)
 	Heartbeat.entities[#Heartbeat.entities+1] = {
 		id = object.id,
-		x = object.x,
-		y = object.y,
+		x = x,
+		y = y,
 		originalX = object.x,
 		originalY = object.y,
 		dx = 0,

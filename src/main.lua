@@ -6,8 +6,8 @@ function love.load()
 	love.window.setTitle("Heartbeat")
 	love.keyboard.setKeyRepeat(true)
 	love.filesystem.setIdentity("heartbeat")
-	Heartbeat.createPlayer(Player)
-	Heartbeat.newEntity(Zombie)
+	Heartbeat.createPlayer(Player, 100, 100)
+	Heartbeat.newEntity(Zombie, 200, 100)
 	Heartbeat.newTile(Stone, 25, 25)
 	Heartbeat.editor.isActive = true
 	-- Perhaps add a thing to heartbeat to catalog? Maybe not because editor
@@ -18,16 +18,12 @@ Editor = {}
 Editor.isActive = false
 
 Player = {
-	x = 100,
-	y = 100,
 	height = 50,
 	width = 25 
 }
 
 Zombie = {
 	id = "zombie",
-	x = 200,
-	y = 100,
 	height = 50,
 	width = 25,
 	health = 20,
