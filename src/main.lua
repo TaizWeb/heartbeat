@@ -1,18 +1,17 @@
-require("heartbeat")
+require("lib/heartbeat")
 
 function love.load()
 	windowWidth = love.graphics.getWidth()
 	windowHeight = love.graphics.getHeight()
 	love.window.setTitle("Heartbeat")
 	love.keyboard.setKeyRepeat(true)
-	--love.filesystem.setIdentity("project-proton")
-	Heartbeat.createPlayer(0, 0, 25, 50)
-	Heartbeat.newEntity("zombie", 100, 10, zombie, 5, 5, 50, 50)
-	Heartbeat.newTile("stone", 0, 250, 25, 25)
-end
-
-function zombie(this)
-	this.x = this.x + 50
+	love.filesystem.setIdentity("heartbeat")
+	Heartbeat.createPlayer(Player)
+	Heartbeat.newEntity(Zombie)
+	Heartbeat.newTile(Stone, 25, 25)
+	Heartbeat.editor.isActive = true
+	-- Perhaps add a thing to heartbeat to catalog? Maybe not because editor
+	Heartbeat.tilesList = {Stone}
 end
 
 Editor = {}
@@ -21,18 +20,42 @@ Editor.isActive = false
 Player = {
 	x = 100,
 	y = 100,
-	height = 100,
-	width = 100
+	height = 50,
+	width = 25 
+}
+
+Zombie = {
+	id = "zombie",
+	x = 200,
+	y = 100,
+	height = 50,
+	width = 25,
+	health = 20,
+	attack = 1
+}
+
+function Zombie.behaivor(this)
+	this.x = this.x + 50
+end
+
+Stone = {
+	id = "stone",
+	width = 25,
+	height = 25
 }
 
 function love.keypressed(key, scancode, isrepeat)
-	if (not Editor.isActive) then
-		print("Game mode")
-	else
-		print("Pause Mode")
+	if (key == "e") then
+		Heartbeat.editor.isActive = not Heartbeat.editor.isActive
 	end
-	if (key == "return") then
-		Editor.isActive = not Editor.isActive
+	if (Heartbeat.editor.isActive) then
+		Heartbeat.editor.handleInput(key)
+	end
+end
+
+function love.mousepressed(x, y, button, istouch, presses)
+	if (Heartbeat.editor.isActive) then
+		Heartbeat.editor.handleInput(button)
 	end
 end
 

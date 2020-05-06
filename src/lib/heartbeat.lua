@@ -3,9 +3,13 @@ require("lib/split")
 
 Heartbeat = {
 	gravity = .5,
+	editor = {
+		isActive = false,
+		currentTile = "stone"
+	},
 	entities = {},
 	tiles = {},
-	items = {}
+	items = {},
 }
 
 -- draw: Accepts two parameters, the object, and an optional texture. Without a texture the hitbox will be drawn.
@@ -94,11 +98,11 @@ function Heartbeat.doEntities()
 end
 
 -- newTile: Initializes a new tile and loads it into Heartbeat
-function Heartbeat.newTile(object)
+function Heartbeat.newTile(object, x, y)
 	Heartbeat.tiles[#Heartbeat.tiles+1] = {
-		name = name,
-		x = object.x,
-		y = object.y,
+		id = object.id,
+		x = x,
+		y = y,
 		width = object.width,
 		height = object.height,
 		texture = object.texture
@@ -109,6 +113,35 @@ end
 function Heartbeat.drawTiles()
 	for i=1,#Heartbeat.tiles do
 		Heartbeat.draw(Heartbeat.tiles[i])
+	end
+end
+
+function Heartbeat.lookupTile(id)
+	for i=1,#Heartbeat.tilesList do
+		print(Heartbeat.tilesList[i].id)
+		if (id == Heartbeat.tilesList[i].id) then
+			print("Found somethin")
+			return Heartbeat.tilesList[i]
+		end
+	end
+end
+
+function Heartbeat.drawEditor()
+	if (Heartbeat.editor.isActive) then
+		love.graphics.setColor(1, 1, 1, .5)
+		love.graphics.rectangle("fill", math.floor(love.mouse.getX() / 25) * 25, math.floor(love.mouse.getY() / 25) * 25, 25, 25)
+	end
+end
+
+function Heartbeat.editor.handleInput(key)
+	if (key ~= "e") then
+		print(key)
+	end
+	if (key == 1) then
+		local snapx = math.floor((love.mouse.getX() + Camera.x) / 25) * 25
+		local snapy = math.floor((love.mouse.getY() + Camera.y) / 25) * 25
+		local tileInfo = Heartbeat.lookupTile(Heartbeat.editor.currentTile)
+		Heartbeat.newTile(tileInfo, snapx, snapy)
 	end
 end
 
@@ -168,11 +201,14 @@ end
 
 -- Heartbeat's main function
 function Heartbeat.beat()
-	Heartbeat.doEntities()
-	Heartbeat.doPlayer()
+	if (not Heartbeat.editor.isActive) then
+		Heartbeat.doEntities()
+		Heartbeat.doPlayer()
+	end
 	Heartbeat.drawBackground()
 	Heartbeat.drawTiles()
 	Heartbeat.drawEntities()
 	Heartbeat.drawPlayer()
+	Heartbeat.drawEditor()
 end
 
