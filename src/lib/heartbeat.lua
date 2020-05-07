@@ -99,14 +99,23 @@ end
 
 -- newTile: Initializes a new tile and loads it into Heartbeat
 function Heartbeat.newTile(object, x, y)
-	Heartbeat.tiles[#Heartbeat.tiles+1] = {
-		id = object.id,
-		x = x,
-		y = y,
-		width = object.width,
-		height = object.height,
-		texture = object.texture
-	}
+	local isNewTile = true
+	for i=1,#Heartbeat.tiles do
+		-- If tile currently exists, set isNewTile to false
+		if (Heartbeat.tiles[i].x == x and Heartbeat.tiles[i].y == y and Heartbeat.tiles[i].id == Heartbeat.editor.currentTile) then
+			isNewTile = false
+		end
+	end
+	if (isNewTile) then
+		Heartbeat.tiles[#Heartbeat.tiles+1] = {
+			id = object.id,
+			x = x,
+			y = y,
+			width = object.width,
+			height = object.height,
+			texture = object.texture
+		}
+	end
 end
 
 -- drawTiles: Draws the tiles to the screen
