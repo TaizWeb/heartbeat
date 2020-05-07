@@ -6,7 +6,9 @@ Heartbeat = {
 	editor = {
 		isActive = false,
 		mode = "tile",
-		currentTile = "stone"
+		-- Later set these to automatically set on startup
+		currentTile = "stone",
+		currentEntity = "zombie"
 	},
 	entities = {},
 	tiles = {},
@@ -130,6 +132,14 @@ function Heartbeat.lookupTile(id)
 	for i=1,#Heartbeat.tilesList do
 		if (id == Heartbeat.tilesList[i].id) then
 			return Heartbeat.tilesList[i]
+		end
+	end
+end
+
+function Heartbeat.lookupEntity(id)
+	for i=1,#Heartbeat.entitiesList do
+		if (id == Heartbeat.entitiesList[i].id) then
+			return Heartbeat.entitiesList[i]
 		end
 	end
 end

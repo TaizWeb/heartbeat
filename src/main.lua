@@ -12,6 +12,7 @@ function love.load()
 	Heartbeat.editor.isActive = true
 	-- Perhaps add a thing to heartbeat to catalog? Maybe not because editor
 	Heartbeat.tilesList = {Stone}
+	Heartbeat.entitiesList = {Zombie}
 end
 
 Editor = {}
