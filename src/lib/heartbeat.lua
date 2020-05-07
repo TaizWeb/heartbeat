@@ -5,6 +5,7 @@ Heartbeat = {
 	gravity = .5,
 	editor = {
 		isActive = false,
+		mode = "tile",
 		currentTile = "stone"
 	},
 	entities = {},
@@ -127,9 +128,7 @@ end
 
 function Heartbeat.lookupTile(id)
 	for i=1,#Heartbeat.tilesList do
-		print(Heartbeat.tilesList[i].id)
 		if (id == Heartbeat.tilesList[i].id) then
-			print("Found somethin")
 			return Heartbeat.tilesList[i]
 		end
 	end
@@ -149,8 +148,10 @@ function Heartbeat.editor.handleInput(key)
 	if (key == 1) then
 		local snapx = math.floor((love.mouse.getX() + Camera.x) / 25) * 25
 		local snapy = math.floor((love.mouse.getY() + Camera.y) / 25) * 25
-		local tileInfo = Heartbeat.lookupTile(Heartbeat.editor.currentTile)
-		Heartbeat.newTile(tileInfo, snapx, snapy)
+		if (Heartbeat.editor.mode == "tile") then
+			local tileInfo = Heartbeat.lookupTile(Heartbeat.editor.currentTile)
+			Heartbeat.newTile(tileInfo, snapx, snapy)
+		end
 	end
 end
 
