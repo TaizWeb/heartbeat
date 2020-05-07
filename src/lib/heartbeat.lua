@@ -136,6 +136,17 @@ end
 
 function Heartbeat.drawEditor()
 	if (Heartbeat.editor.isActive) then
+		if (Heartbeat.editor.mode == "tile") then
+			Heartbeat.debugLine = "Current Tile: " .. Heartbeat.lookupTile(Heartbeat.editor.currentTile).id .. "\n"
+		elseif (Heartbeat.editor.mode == "entity") then
+			Heartbeat.debugLine = "Current Entity: " .. Heartbeat.lookupEntity(Heartbeat.editor.currentEntity).id .. "\n"
+		elseif (Heartbeat.editor.mode == "item") then
+			Heartbeat.debugLine = "Current Item: " .. Heartbeat.lookupItem(Heartbeat.editor.currentItem).id .. "\n"
+		end
+		-- Drawing current tile/entity/item info
+		love.graphics.setColor(1, 1, 1, 1)
+		love.graphics.print(Heartbeat.debugLine)
+		-- Drawing the cursor
 		love.graphics.setColor(1, 1, 1, .5)
 		love.graphics.rectangle("fill", math.floor(love.mouse.getX() / 25) * 25, math.floor(love.mouse.getY() / 25) * 25, 25, 25)
 	end
@@ -145,6 +156,7 @@ function Heartbeat.editor.handleInput(key)
 	if (key ~= "e") then
 		print(key)
 	end
+	-- Handle mouse click, place tile/entity/item
 	if (key == 1) then
 		local snapx = math.floor((love.mouse.getX() + Camera.x) / 25) * 25
 		local snapy = math.floor((love.mouse.getY() + Camera.y) / 25) * 25
@@ -153,6 +165,20 @@ function Heartbeat.editor.handleInput(key)
 			Heartbeat.newTile(tileInfo, snapx, snapy)
 		end
 	end
+	if (key == "down") then
+			if (Heartbeat.editor.mode == "tile") then
+				Heartbeat.editor.mode = "entity"
+			elseif (Heartbeat.editor.mode == "entity") then
+				Heartbeat.editor.mode = "item"
+			end
+		end
+		if (key == "up") then
+			if (Heartbeat.editor.mode == "entity") then
+				Heartbeat.editor.mode = "tile"
+			elseif (Heartbeat.editor.mode == "item") then
+				Heartbeat.editor.mode = "entity"
+			end
+		end
 end
 
 -- clear: Clears all the entities and tiles
