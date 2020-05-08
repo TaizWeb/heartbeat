@@ -5,8 +5,8 @@
 * A collision framework
 * A ready-to-use camera
 * A simple entity/tile creator/manager
-* A level reader/writer (in progress)
-* A level editor (in progress)
+* A level reader/writer
+* A level editor
 * A dialog framework (coming soon)
 * A simple menu system (coming soon)
 
