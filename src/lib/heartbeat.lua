@@ -155,7 +155,7 @@ function Heartbeat.lookupEntity(id)
 	end
 end
 
-function Heartbeat.drawEditor()
+function Heartbeat.editor.drawEditor()
 	if (Heartbeat.editor.isActive) then
 		if (Heartbeat.editor.mode == "tile") then
 			Heartbeat.debugLine = "Current Tile: " .. Heartbeat.lookupTile(Heartbeat.editor.currentTile).id .. "\n"
@@ -433,6 +433,6 @@ function Heartbeat.beat()
 	Heartbeat.drawTiles()
 	Heartbeat.drawEntities()
 	Heartbeat.drawPlayer()
-	Heartbeat.drawEditor()
+	Heartbeat.editor.drawEditor()
 end
 
