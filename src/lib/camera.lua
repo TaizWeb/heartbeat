@@ -17,10 +17,10 @@ function Camera.update()
 		Camera.y = 0
 	end
 	if (Camera.x > (Level.width - windowWidth)) then
-		Camera.x = Level.width - windowWidth
+		Camera.x = Heartbeat.levelWidth - windowWidth
 	end
 	if (Camera.y > (Level.height - windowHeight)) then
-		Camera.y = Level.height - windowHeight
+		Camera.y = Heartbeat.levelHeight - windowHeight
 	end
 end
 
