@@ -208,6 +208,10 @@ function Heartbeat.editor.handleInput(key)
 			local tileInfo = Heartbeat.lookupTile(Heartbeat.editor.currentTile)
 			Heartbeat.newTile(tileInfo, snapx, snapy)
 		end
+		if (Heartbeat.editor.mode == "entity") then
+			local entityInfo = Heartbeat.lookupEntity(Heartbeat.editor.currentEntity)
+			Heartbeat.newEntity(entityInfo, snapx, snapy)
+		end
 	end
 	-- Handle swapping between tile/entity/item
 	if (key == "down") then
