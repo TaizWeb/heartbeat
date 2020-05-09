@@ -11,6 +11,7 @@ Heartbeat = {
 		mode = "tile",
 		currentTile = "stone",
 		currentEntity = "zombie",
+		currentItem = "brick",
 		commandModeLine = ""
 	},
 	levelWidth = 0,
@@ -182,6 +183,14 @@ function Heartbeat.lookupEntity(id)
 	end
 end
 
+function Heartbeat.lookupItem(id)
+	for i=1,#Heartbeat.itemsList do
+		if (id == Heartbeat.itemsList[i].id) then
+			return Heartbeat.itemsList[i]
+		end
+	end
+end
+
 function Heartbeat.editor.drawEditor()
 	if (Heartbeat.editor.isActive) then
 		if (Heartbeat.editor.mode == "tile") then
@@ -239,9 +248,12 @@ function Heartbeat.editor.handleInput(key)
 			local entityInfo = Heartbeat.lookupEntity(Heartbeat.editor.currentEntity)
 			Heartbeat.newEntity(entityInfo, snapx, snapy)
 		end
+		if (Heartbeat.editor.mode == "item") then
+			local itemInfo = Heartbeat.lookupItem(Heartbeat.editor.currentItem)
+			Heartbeat.newItem(itemInfo, snapx, snapy)
+		end
 	end
 	-- Handle right mouse click, remove tile
-	-- TODO: Add item removal
 	if (key == 2) then
 		if (Heartbeat.editor.mode == "tile") then
 			for i=1,#Heartbeat.tiles do
@@ -264,6 +276,20 @@ function Heartbeat.editor.handleInput(key)
 			for i=1,#Heartbeat.entities do
 				if (Heartbeat.checkEntityCollision(mouseHitbox, Heartbeat.entities[i])) then
 					table.remove(Heartbeat.entities, i)
+					break
+				end
+			end
+		end
+		if (Heartbeat.editor.mode == "item") then
+			local mouseHitbox = {
+				x = love.mouse.getX(),
+				y = love.mouse.getY(),
+				width = 1,
+				height = 1,
+			}
+			for i=1,#Heartbeat.items do
+				if (Heartbeat.checkEntityCollision(mouseHitbox, Heartbeat.items[i])) then
+					table.remove(Heartbeat.items, i)
 					break
 				end
 			end
