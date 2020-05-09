@@ -213,6 +213,17 @@ function Heartbeat.editor.handleInput(key)
 			Heartbeat.newEntity(entityInfo, snapx, snapy)
 		end
 	end
+	if (key == 2) then
+		for i=1,#Heartbeat.tiles do
+			local snapx = math.floor((love.mouse.getX() + Camera.x) / 25) * 25
+			local snapy = math.floor((love.mouse.getY() + Camera.y) / 25) * 25
+			if (Heartbeat.tiles[i].x == snapx and Heartbeat.tiles[i].y == snapy) then
+				table.remove(Heartbeat.tiles, i)
+				--Level.tileCount = Level.tileCount - 1
+				break
+			end
+		end
+	end
 	-- Handle swapping between tile/entity/item
 	if (key == "down") then
 		if (Heartbeat.editor.mode == "tile") then
