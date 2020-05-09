@@ -213,14 +213,32 @@ function Heartbeat.editor.handleInput(key)
 			Heartbeat.newEntity(entityInfo, snapx, snapy)
 		end
 	end
+	-- Handle right mouse click, remove tile
+	-- TODO: Add item/entity removal
 	if (key == 2) then
-		for i=1,#Heartbeat.tiles do
-			local snapx = math.floor((love.mouse.getX() + Camera.x) / 25) * 25
-			local snapy = math.floor((love.mouse.getY() + Camera.y) / 25) * 25
-			if (Heartbeat.tiles[i].x == snapx and Heartbeat.tiles[i].y == snapy) then
-				table.remove(Heartbeat.tiles, i)
-				--Level.tileCount = Level.tileCount - 1
-				break
+		if (Heartbeat.editor.mode == "tile") then
+			for i=1,#Heartbeat.tiles do
+				local snapx = math.floor((love.mouse.getX() + Camera.x) / 25) * 25
+				local snapy = math.floor((love.mouse.getY() + Camera.y) / 25) * 25
+				if (Heartbeat.tiles[i].x == snapx and Heartbeat.tiles[i].y == snapy) then
+					table.remove(Heartbeat.tiles, i)
+					--Level.tileCount = Level.tileCount - 1
+					break
+				end
+			end
+		end
+		if (Heartbeat.editor.mode == "entity") then
+			local mouseHitbox = {
+				x = love.mouse.getX(),
+				y = love.mouse.getY(),
+				width = 1,
+				height = 1,
+			}
+			for i=1,#Heartbeat.entities do
+				if (Heartbeat.checkEntityCollision(mouseHitbox, Heartbeat.entities[i])) then
+					table.remove(Heartbeat.entities, i)
+					break
+				end
 			end
 		end
 	end
