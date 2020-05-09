@@ -9,10 +9,12 @@ function love.load()
 	Heartbeat.createPlayer(Player, 100, 100)
 	Heartbeat.newEntity(Zombie, 200, 100)
 	Heartbeat.newTile(Stone, 25, 25)
+	Heartbeat.newItem(Brick, 100, 200)
 	Heartbeat.editor.isActive = true
 	-- Perhaps add a thing to heartbeat to catalog? Maybe not because editor
 	Heartbeat.tilesList = {Stone}
 	Heartbeat.entitiesList = {Zombie}
+	Heartbeat.itemsList = {Brick}
 end
 
 Editor = {}
@@ -30,6 +32,16 @@ Zombie = {
 	health = 20,
 	attack = 1
 }
+
+Brick = {
+	id = "brick",
+	height = 10,
+	width = 10
+}
+
+function Brick.onPickup()
+	print("Picked up brick!")
+end
 
 function Zombie.behaivor(this)
 	this.x = this.x + 50
