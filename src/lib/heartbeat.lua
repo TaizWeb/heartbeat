@@ -246,11 +246,11 @@ function Heartbeat.editor.handleInput(key)
 		end
 		if (Heartbeat.editor.mode == "entity") then
 			local entityInfo = Heartbeat.lookupEntity(Heartbeat.editor.currentEntity)
-			Heartbeat.newEntity(entityInfo, snapx, snapy)
+			Heartbeat.newEntity(entityInfo, love.mouse.getX(), love.mouse.getY())
 		end
 		if (Heartbeat.editor.mode == "item") then
 			local itemInfo = Heartbeat.lookupItem(Heartbeat.editor.currentItem)
-			Heartbeat.newItem(itemInfo, snapx, snapy)
+			Heartbeat.newItem(itemInfo, love.mouse.getX(), love.mouse.getY())
 		end
 	end
 	-- Handle right mouse click, remove tile
