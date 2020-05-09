@@ -66,6 +66,14 @@ end
 function Heartbeat.doPlayer()
 	Heartbeat.player.dy = Heartbeat.player.dy + Heartbeat.gravity
 	Heartbeat.checkCollisions(Heartbeat.player)
+	for i=1,#Heartbeat.items do
+		if (Heartbeat.checkEntityCollision(Heartbeat.items[i], Heartbeat.player)) then
+			local item = Heartbeat.items[i]
+			if (item.onPickup ~= nil) then
+				item.onPickup()
+			end
+		end
+	end
 end
 
 -- newEntity: Initializes and loads the entity into Heartbeat
@@ -136,6 +144,25 @@ end
 function Heartbeat.drawTiles()
 	for i=1,#Heartbeat.tiles do
 		Heartbeat.draw(Heartbeat.tiles[i])
+	end
+end
+
+function Heartbeat.newItem(object, x, y)
+	Heartbeat.items[#Heartbeat.items+1] = {
+		id = object.id,
+		x = x,
+		y = y,
+		dx = 0,
+		dy = 0,
+		width = object.width,
+		height = object.height,
+		onPickup = object.onPickup
+	}
+end
+
+function Heartbeat.drawItems()
+	for i=1,#Heartbeat.items do
+		Heartbeat.draw(Heartbeat.items[i])
 	end
 end
 
@@ -214,7 +241,7 @@ function Heartbeat.editor.handleInput(key)
 		end
 	end
 	-- Handle right mouse click, remove tile
-	-- TODO: Add item/entity removal
+	-- TODO: Add item removal
 	if (key == 2) then
 		if (Heartbeat.editor.mode == "tile") then
 			for i=1,#Heartbeat.tiles do
@@ -461,6 +488,7 @@ function Heartbeat.beat()
 	Heartbeat.drawBackground()
 	Heartbeat.drawTiles()
 	Heartbeat.drawEntities()
+	Heartbeat.drawItems()
 	Heartbeat.drawPlayer()
 	Heartbeat.editor.drawEditor()
 end
