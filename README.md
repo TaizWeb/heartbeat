@@ -7,6 +7,7 @@
 * A simple entity/tile creator/manager
 * A level reader/writer
 * A level editor
+* A player inventory manager
 * A dialog framework (coming soon)
 * A simple menu system (coming soon)
 
