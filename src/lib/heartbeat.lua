@@ -50,7 +50,9 @@ function Heartbeat.createPlayer(object, x, y)
 		attack = 0,
 		health = health,
 		jumpFrames = 0,
-		jumpCooldown = 0
+		jumpCooldown = 0,
+		-- Format is item, count
+		inventory = {}
 	}
 end
 
@@ -171,6 +173,20 @@ function Heartbeat.removeItem(item)
 	for i=1,#Heartbeat.items do
 		if (item == Heartbeat.items[i]) then
 			table.remove(Heartbeat.items, i)
+		end
+	end
+end
+
+function Heartbeat.addInventoryItem(item)
+	if (#Heartbeat.player.inventory == 0) then
+		Heartbeat.player.inventory[#Heartbeat.player.inventory+1] = {id = item.id, count = 1}
+		return
+	end
+	for i=1,#Heartbeat.player.inventory do
+		if (Heartbeat.player.inventory[i].id == item.id) then
+			Heartbeat.player.inventory[i].count = Heartbeat.player.inventory[i].count + 1
+		else
+			Heartbeat.player.inventory[#Heartbeat.player.inventory+1].id = item.id
 		end
 	end
 end
@@ -494,6 +510,8 @@ end
 
 -- checkEntityCollisons: Compares two entities, returns true if they collide
 function Heartbeat.checkEntityCollision(entity1, entity2)
+	-- Quick duct tape for if entity is removed during the loop
+	if (entity1 == nil or entity2 == nil) then return end
 	if (Camera.convert("x", entity1.x) < Camera.convert("x", entity2.x) + entity2.width and ((Camera.convert("x", entity1.x) + entity1.width) > (Camera.convert("x", entity2.x))) and Camera.convert("y", entity1.y) < Camera.convert("y", entity2.y) + entity2.height and ((Camera.convert("y", entity1.y) + entity1.height) > (Camera.convert("y", entity2.y)))) then
 		return true
 	else
