@@ -202,6 +202,15 @@ function Heartbeat.player.addInventoryItem(item)
 	end
 end
 
+function Heartbeat.player.removeInventoryItem(item)
+	local inventoryIndex = Heartbeat.player.hasInventoryItem(item)
+	if (inventoryIndex ~= -1) then
+		table.remove(Heartbeat.player.inventory, inventoryIndex)
+	else
+		print("Heartbeat Error: Player has no item of id '" .. item.id .."'")
+	end
+end
+
 function Heartbeat.player.hasInventoryItem(item)
 	for i=1,#Heartbeat.player.inventory do
 		if (Heartbeat.player.inventory[i].id == item.id) then
