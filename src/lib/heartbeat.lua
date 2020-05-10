@@ -71,7 +71,7 @@ function Heartbeat.doPlayer()
 		if (Heartbeat.checkEntityCollision(Heartbeat.items[i], Heartbeat.player)) then
 			local item = Heartbeat.items[i]
 			if (item.onPickup ~= nil) then
-				item.onPickup()
+				item.onPickup(item)
 			end
 		end
 	end
@@ -164,6 +164,14 @@ end
 function Heartbeat.drawItems()
 	for i=1,#Heartbeat.items do
 		Heartbeat.draw(Heartbeat.items[i])
+	end
+end
+
+function Heartbeat.removeItem(item)
+	for i=1,#Heartbeat.items do
+		if (item == Heartbeat.items[i]) then
+			table.remove(Heartbeat.items, i)
+		end
 	end
 end
 
