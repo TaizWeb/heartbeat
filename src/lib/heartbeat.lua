@@ -25,6 +25,7 @@ Heartbeat = {
 	entities = {},
 	tiles = {},
 	items = {},
+	player = {}
 }
 
 -- draw: Accepts two parameters, the object, and an optional texture. Without a texture the hitbox will be drawn.
@@ -39,21 +40,32 @@ end
 
 -- createPlayer: Creates the player object and loads it into Heartbeat
 function Heartbeat.createPlayer(object, x, y)
-	Heartbeat.player = {
-		x = x,
-		y = y,
-		dx = 0,
-		dy = 0,
-		height = object.height,
-		width = object.width,
-		health = 0,
-		attack = 0,
-		health = health,
-		jumpFrames = 0,
-		jumpCooldown = 0,
-		-- Format is item, count
-		inventory = {}
-	}
+	Heartbeat.player.x = x
+	Heartbeat.player.y = y
+	Heartbeat.player.dx = 0
+	Heartbeat.player.dy = 0
+	Heartbeat.player.height = object.height
+	Heartbeat.player.width = object.width
+	Heartbeat.player.health = object.health
+	Heartbeat.player.attack = object.attack
+	Heartbeat.player.jumpFrames = 0
+	Heartbeat.player.jumpCooldown = 0
+	Heartbeat.player.inventory = {}
+	--Heartbeat.player = {
+		--x = x,
+		--y = y,
+		--dx = 0,
+		--dy = 0,
+		--height = object.height,
+		--width = object.width,
+		--health = 0,
+		--attack = 0,
+		----health = health,
+		--jumpFrames = 0,
+		--jumpCooldown = 0,
+		---- Format is item, count
+		--inventory = {}
+	--}
 end
 
 -- drawPlayer: Draws the player to the screen
@@ -177,16 +189,25 @@ function Heartbeat.removeItem(item)
 	end
 end
 
-function Heartbeat.addInventoryItem(item)
+function Heartbeat.player.addInventoryItem(item)
 	if (#Heartbeat.player.inventory == 0) then
 		Heartbeat.player.inventory[#Heartbeat.player.inventory+1] = {id = item.id, count = 1}
 		return
 	end
+	local inventoryIndex = Heartbeat.player.hasInventoryItem(item)
+	if (inventoryIndex ~= -1) then
+		Heartbeat.player.inventory[inventoryIndex].count = Heartbeat.player.inventory[inventoryIndex].count + 1
+	else
+		Heartbeat.player.inventory[#Heartbeat.player.inventory+1].id = item.id
+	end
+end
+
+function Heartbeat.player.hasInventoryItem(item)
 	for i=1,#Heartbeat.player.inventory do
 		if (Heartbeat.player.inventory[i].id == item.id) then
-			Heartbeat.player.inventory[i].count = Heartbeat.player.inventory[i].count + 1
+			return i
 		else
-			Heartbeat.player.inventory[#Heartbeat.player.inventory+1].id = item.id
+			return -1
 		end
 	end
 end
