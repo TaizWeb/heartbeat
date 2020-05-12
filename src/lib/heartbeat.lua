@@ -307,6 +307,7 @@ function Heartbeat.dialog.drawDialog()
 	love.graphics.setColor(0, 0, 1, .8)
 	love.graphics.rectangle("line", 0, windowHeight - 150, windowWidth, 150)
 	love.graphics.setColor(1, 1, 1, 1)
+	love.graphics.print(Heartbeat.dialog.speaker, Heartbeat.dialog.font, 0, windowHeight - 150 - Heartbeat.dialog.font:getHeight())
 	love.graphics.print(string.sub(Heartbeat.dialog.currentLine, 0, Heartbeat.dialog.dialogCharacter), Heartbeat.dialog.font, 10, windowHeight - 150)
 	Heartbeat.dialog.dialogCharacter = Heartbeat.dialog.dialogCharacter + 1
 end
