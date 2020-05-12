@@ -14,6 +14,18 @@ Heartbeat = {
 		currentItem = "brick",
 		commandModeLine = ""
 	},
+	dialog = {
+		isOpen = false,
+		font = love.graphics.newFont(20),
+		speaker = nil,
+		portrait = nil,
+		dialogLines = {},
+		dialogIndex = 0,
+		dialogCharacter = 0,
+		currentLine = "",
+		speakers = {},
+		portraits = {}
+	},
 	levelWidth = 0,
 	levelHeight = 0,
 	-- These will be set manually on startup
@@ -107,6 +119,9 @@ function Heartbeat.newEntity(object, x, y)
 		attack = object.attack,
 		behaivor = object.behaivor
 	}
+	if (object.isNPC) then
+		Heartbeat.entities[#Heartbeat.entities].isNPC = true
+	end
 end
 
 -- drawEntities: Draws all the entities to the screen
@@ -243,6 +258,57 @@ function Heartbeat.lookupItem(id)
 			return Heartbeat.itemsList[i]
 		end
 	end
+end
+
+function Heartbeat.dialog.openDialog(dialog)
+	if (not Heartbeat.dialog.isOpen) then
+		-- Load the speech file and split it
+		local rawDialog = love.filesystem.read("dialog/" .. dialog .. ".txt")
+		Heartbeat.dialog.dialogLines = split(rawDialog, "\n")
+		Heartbeat.dialog.dialogIndex = 0
+		Heartbeat.dialog.isOpen = true
+		Heartbeat.dialog.nextLine()
+	else
+		Heartbeat.dialog.nextLine()
+	end
+end
+
+function Heartbeat.dialog.nextLine()
+	Heartbeat.dialog.currentLine = Heartbeat.dialog.dialogLines[Heartbeat.dialog.dialogIndex+1]
+	Heartbeat.dialog.dialogCharacter = 0
+	Heartbeat.dialog.dialogIndex = Heartbeat.dialog.dialogIndex + 1
+	-- Out of bounds check
+	if (Heartbeat.dialog.currentLine == nil) then
+		Heartbeat.dialog.isOpen = false
+		return
+	end
+
+	-- Removing newlines
+	local strippedString = ""
+	for i=1,string.len(Heartbeat.dialog.currentLine) do
+		if (string.sub(Heartbeat.dialog.currentLine, i, i) ~= "\n") then
+			strippedString = strippedString .. string.sub(Heartbeat.dialog.currentLine, i, i)
+		end
+	end
+	Heartbeat.dialog.currentLine = strippedString
+
+	if (string.sub(Heartbeat.dialog.currentLine, 1, 1) == "[") then
+		for i=1,#Heartbeat.dialog.speakers do
+			if (Heartbeat.dialog.currentLine == "[" .. Heartbeat.dialog.speakers[i] .. "]") then
+				Heartbeat.dialog.speaker = Heartbeat.dialog.speakers[i]
+				Heartbeat.dialog.nextLine()
+				-- Add portrait later
+			end
+		end
+	end
+end
+
+function Heartbeat.dialog.drawDialog()
+	love.graphics.setColor(0, 0, 1, .8)
+	love.graphics.rectangle("line", 0, windowHeight - 150, windowWidth, 150)
+	love.graphics.setColor(1, 1, 1, 1)
+	love.graphics.print(string.sub(Heartbeat.dialog.currentLine, 0, Heartbeat.dialog.dialogCharacter), Heartbeat.dialog.font, 10, windowHeight - 150)
+	Heartbeat.dialog.dialogCharacter = Heartbeat.dialog.dialogCharacter + 1
 end
 
 function Heartbeat.editor.drawEditor()
@@ -573,5 +639,8 @@ function Heartbeat.beat()
 	Heartbeat.drawItems()
 	Heartbeat.drawPlayer()
 	Heartbeat.editor.drawEditor()
+	if (Heartbeat.dialog.isOpen) then
+		Heartbeat.dialog.drawDialog()
+	end
 end
 
