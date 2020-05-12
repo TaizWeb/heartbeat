@@ -18,6 +18,9 @@ Simply copy the contents of `lib/` to the `lib/` folder of your project. `main.l
 For now, refer to `main.lua` on how to create valid entity/tile objects and use them with Heartbeat. The project is a work in progress, but expect official docs soon.
 
 ## FAQ
+**What version of lua/love2d should I be using?**
+At the time of this writing, Heartbeat currently targets lua 5.3 and love2d 11.1. As either of these get updated, Heartbeat will be as well.
+
 **Can I use this in my game?**
 
 Of course. Heartbeat is licensed under MIT, meaning you can do whatever you want with it, even package it with games to sell.
