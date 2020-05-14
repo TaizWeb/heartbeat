@@ -343,6 +343,7 @@ function Heartbeat.editor.drawEditor()
 		elseif (Heartbeat.editor.mode == "item") then
 			Heartbeat.debugLine = "Current Item: " .. Heartbeat.lookupItem(Heartbeat.editor.currentItem).id .. "\n"
 		end
+		Heartbeat.debugLine = Heartbeat.debugLine .. "Mouse Position: " .. love.mouse.getX() .. " " .. love.mouse.getY() .. "\n"
 		-- Drawing current tile/entity/item info
 		love.graphics.setColor(1, 1, 1, 1)
 		love.graphics.print(Heartbeat.debugLine)
@@ -487,6 +488,16 @@ function Heartbeat.editor.executeCommand()
 		else
 			print("Error: Invalid arguments.\nUsage: set <variable> <value>")
 		end
+	-- :room <roomfilename> <doorX> <doorY> <newroomX> <newroomY> (Creates a new door in a level)
+	elseif (Heartbeat.editor.commandModeLine:sub(1, 4) == "room") then
+		local args = split(Heartbeat.editor.commandModeLine, " ")
+		Heartbeat.rooms[#Heartbeat.rooms+1] = {
+			location = args[2],
+			x = tonumber(args[3]),
+			y = tonumber(args[4]),
+			newX = tonumber(args[5]),
+			newY = tonumber(args[6])
+		}
 	-- :clear (clears level)
 	elseif (Heartbeat.editor.commandModeLine:sub(1, 5) == "clear") then
 		Heartbeat.clear()
@@ -611,7 +622,7 @@ end
 function Heartbeat.gotoRoom(room, x, y)
 	print("Room " .. room .. " loaded.")
 	Heartbeat.clear()
-	Heartbeat.readLevel(room)
+	Heartbeat.editor.readLevel(room)
 	Heartbeat.player.x = x
 	Heartbeat.player.y = y
 end
