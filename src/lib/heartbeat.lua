@@ -21,6 +21,8 @@ Heartbeat = {
 		portrait = nil,
 		dialogLines = {},
 		dialogIndex = 0,
+		-- What appears in the text box
+		printedLines = {},
 		dialogCharacter = 0,
 		currentLine = "",
 		speakers = {},
@@ -307,9 +309,28 @@ function Heartbeat.dialog.drawDialog()
 	love.graphics.setColor(0, 0, 1, .8)
 	love.graphics.rectangle("line", 0, windowHeight - 150, windowWidth, 150)
 	love.graphics.setColor(1, 1, 1, 1)
-	love.graphics.print(Heartbeat.dialog.speaker, Heartbeat.dialog.font, 0, windowHeight - 150 - Heartbeat.dialog.font:getHeight())
-	love.graphics.print(string.sub(Heartbeat.dialog.currentLine, 0, Heartbeat.dialog.dialogCharacter), Heartbeat.dialog.font, 10, windowHeight - 150)
-	Heartbeat.dialog.dialogCharacter = Heartbeat.dialog.dialogCharacter + 1
+	local firstLine = string.sub(Heartbeat.dialog.currentLine, 0, Heartbeat.dialog.dialogCharacter)
+	local previousLength = 0
+	if (Heartbeat.dialog.printedLines[#Heartbeat.dialog.printedLines] ~= nil) then
+		for i=1,#Heartbeat.dialog.printedLines do
+			previousLength = previousLength + string.len(Heartbeat.dialog.printedLines[i])
+		end
+	end
+	if (Heartbeat.dialog.font:getWidth(string.sub(Heartbeat.dialog.currentLine, previousLength, previousLength + Heartbeat.dialog.dialogCharacter)) > windowWidth) then
+		Heartbeat.dialog.printedLines[#Heartbeat.dialog.printedLines+1] = string.sub(Heartbeat.dialog.currentLine, previousLength, previousLength + Heartbeat.dialog.dialogCharacter)
+		Heartbeat.dialog.dialogCharacter = 0
+	else
+		Heartbeat.dialog.dialogCharacter = Heartbeat.dialog.dialogCharacter + 1
+	end
+	for i=1,#Heartbeat.dialog.printedLines do
+		if (i == #Heartbeat.dialog.printedLines) then
+			love.graphics.print(string.sub(Heartbeat.dialog.currentLine, previousLength, previousLength + Heartbeat.dialog.dialogCharacter), Heartbeat.dialog.font, 10, windowHeight - 150 + (i*20))
+		end
+		love.graphics.print(Heartbeat.dialog.printedLines[i], Heartbeat.dialog.font, 10, windowHeight - 150 + ((i-1)*20))
+	end
+	if (#Heartbeat.dialog.printedLines == 0) then
+		love.graphics.print(firstLine, Heartbeat.dialog.font, 10, windowHeight - 150)
+	end
 end
 
 function Heartbeat.editor.drawEditor()
