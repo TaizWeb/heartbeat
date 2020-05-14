@@ -316,7 +316,7 @@ function Heartbeat.dialog.drawDialog()
 			previousLength = previousLength + string.len(Heartbeat.dialog.printedLines[i])
 		end
 	end
-	if (Heartbeat.dialog.font:getWidth(string.sub(Heartbeat.dialog.currentLine, previousLength, previousLength + Heartbeat.dialog.dialogCharacter)) > windowWidth) then
+	if (Heartbeat.dialog.font:getWidth(string.sub(Heartbeat.dialog.currentLine, previousLength, previousLength + Heartbeat.dialog.dialogCharacter)) > windowWidth - 25) then
 		Heartbeat.dialog.printedLines[#Heartbeat.dialog.printedLines+1] = string.sub(Heartbeat.dialog.currentLine, previousLength, previousLength + Heartbeat.dialog.dialogCharacter)
 		Heartbeat.dialog.dialogCharacter = 0
 	else
@@ -599,6 +599,22 @@ function Heartbeat.clear()
 	Heartbeat.entities = {}
 end
 
+function Heartbeat.checkRooms()
+	for i=1,#Heartbeat.rooms do
+		if ((Heartbeat.player.x >= Heartbeat.rooms[i].x and Heartbeat.player.x <= Heartbeat.rooms[i].x + 25) and Heartbeat.player.y == Heartbeat.rooms[i].y) then
+			Heartbeat.gotoRoom(Heartbeat.rooms[i].location, Heartbeat.rooms[i].newX, Heartbeat.rooms[i].newY)
+		end
+	end
+end
+
+function Heartbeat.gotoRoom(room, x, y)
+	print("Room " .. room .. " loaded.")
+	Heartbeat.clear()
+	Heartbeat.readLevel(room)
+	Heartbeat.player.x = x
+	Heartbeat.player.y = y
+end
+
 -- checkCollisions: Checks the collisions of all the entities against the tiles
 function Heartbeat.checkCollisions(entity)
 	local attemptedX = entity.x + entity.dx
@@ -654,6 +670,7 @@ function Heartbeat.beat()
 	if (not Heartbeat.editor.isActive) then
 		Heartbeat.doEntities()
 		Heartbeat.doPlayer()
+		Heartbeat.checkRooms()
 	end
 	Heartbeat.drawBackground()
 	Heartbeat.drawTiles()
