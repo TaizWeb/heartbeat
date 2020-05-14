@@ -8,7 +8,7 @@
 * A level reader/writer
 * A level editor
 * A player inventory manager
-* A dialog framework (coming soon)
+* A dialog framework (in progress)
 * A simple menu system (coming soon)
 
 ## Installation
