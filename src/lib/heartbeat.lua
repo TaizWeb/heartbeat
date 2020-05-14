@@ -268,6 +268,7 @@ function Heartbeat.dialog.openDialog(dialog)
 		local rawDialog = love.filesystem.read("dialog/" .. dialog .. ".txt")
 		Heartbeat.dialog.dialogLines = split(rawDialog, "\n")
 		Heartbeat.dialog.dialogIndex = 0
+		Heartbeat.dialog.printedLines = {}
 		Heartbeat.dialog.isOpen = true
 		Heartbeat.dialog.nextLine()
 	else
