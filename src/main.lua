@@ -15,12 +15,17 @@ function love.load()
 	Heartbeat.tilesList = {Stone}
 	Heartbeat.entitiesList = {Zombie}
 	Heartbeat.itemsList = {Brick}
+	Heartbeat.dialog.speakers = {"MM", "MC"}
+	Heartbeat.levelWidth = windowWidth
+	Heartbeat.levelHeight = windowHeight
 end
 
 Editor = {}
 Editor.isActive = false
 
 Player = {
+	x = 100,
+	y = 100,
 	height = 50,
 	width = 25 
 }
@@ -39,7 +44,12 @@ Brick = {
 	width = 10
 }
 
-function Brick.onPickup()
+function Brick.onPickup(this)
+	Heartbeat.removeItem(this)
+	Heartbeat.player.addInventoryItem(this)
+	for i=1,#Heartbeat.player.inventory do
+		print(Heartbeat.player.inventory[i].id .. " " .. Heartbeat.player.inventory[i].count)
+	end
 	print("Picked up brick!")
 end
 
@@ -56,6 +66,9 @@ Stone = {
 function love.keypressed(key, scancode, isrepeat)
 	if (key == "e" and not Heartbeat.editor.commandMode) then
 		Heartbeat.editor.isActive = not Heartbeat.editor.isActive
+	end
+	if (key == "a") then
+		Heartbeat.dialog.openDialog("template")
 	end
 	if (Heartbeat.editor.isActive) then
 		Heartbeat.editor.handleInput(key)

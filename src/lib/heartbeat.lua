@@ -9,9 +9,9 @@ Heartbeat = {
 	editor = {
 		isActive = false,
 		mode = "tile",
-		currentTile = "stone",
-		currentEntity = "zombie",
-		currentItem = "brick",
+		currentTile = 1,
+		currentEntity = 1,
+		currentItem = 1,
 		commandModeLine = ""
 	},
 	dialog = {
@@ -45,8 +45,8 @@ Heartbeat = {
 -- draw: Accepts two parameters, the object, and an optional texture. Without a texture the hitbox will be drawn.
 function Heartbeat.draw(object)
 	love.graphics.setColor(1, 1, 1, 1)
-	if (texture ~= nil) then
-		love.graphics.draw(texture, Camera.convert("x", object.x), Camera.convert("y", Camera.y), object.rotation, object.scaleX, object.scaleY, object.offsetX, object,offsetY)
+	if (object.texture ~= nil) then
+		love.graphics.draw(object.texture, Camera.convert("x", object.x), Camera.convert("y", object.y), object.rotation, object.scaleX, object.scaleY, object.offsetX, object.offsetY)
 	else
 		love.graphics.rectangle("fill", Camera.convert("x", object.x), Camera.convert("y", object.y), object.width, object.height)
 	end
@@ -62,30 +62,18 @@ function Heartbeat.createPlayer(object, x, y)
 	Heartbeat.player.width = object.width
 	Heartbeat.player.health = object.health
 	Heartbeat.player.attack = object.attack
+	Heartbeat.player.walkFrames = 0
 	Heartbeat.player.jumpFrames = 0
 	Heartbeat.player.jumpCooldown = 0
 	Heartbeat.player.inventory = {}
-	--Heartbeat.player = {
-		--x = x,
-		--y = y,
-		--dx = 0,
-		--dy = 0,
-		--height = object.height,
-		--width = object.width,
-		--health = 0,
-		--attack = 0,
-		----health = health,
-		--jumpFrames = 0,
-		--jumpCooldown = 0,
-		---- Format is item, count
-		--inventory = {}
-	--}
+	Heartbeat.player.forwardFace = true
+	Heartbeat.player.cooldownFrames = 0
 end
 
 -- drawPlayer: Draws the player to the screen
 function Heartbeat.drawPlayer()
 	if (Player.draw ~= nil) then
-		Player.draw()
+		Player.draw(Heartbeat.player)
 	else
 		Heartbeat.draw(Heartbeat.player)
 	end
@@ -105,22 +93,46 @@ function Heartbeat.doPlayer()
 	end
 end
 
+function Heartbeat.jump(entity)
+	if (not entity.isFalling) then
+		entity.dy = -11
+		entity.isFalling = true
+	end
+end
+
 -- newEntity: Initializes and loads the entity into Heartbeat
 function Heartbeat.newEntity(object, x, y)
-	Heartbeat.entities[#Heartbeat.entities+1] = {
-		id = object.id,
-		x = x,
-		y = y,
-		originalX = object.x,
-		originalY = object.y,
-		dx = 0,
-		dy = 0,
-		width = object.width,
-		height = object.height,
-		health = object.health,
-		attack = object.attack,
-		behaivor = object.behaivor
-	}
+	local isNewEntity = true
+	for i=1,#Heartbeat.entities do
+		-- If tile currently exists, set isNewTile to false
+		if (Heartbeat.entities[i].x == x and Heartbeat.entities[i].y == y) then
+			isNewEntity = false
+		end
+	end
+	if (isNewEntity) then
+		Heartbeat.entities[#Heartbeat.entities+1] = {
+			id = object.id,
+			texture = object.texture,
+			x = x,
+			y = y,
+			originalX = object.x,
+			originalY = object.y,
+			dx = 0,
+			dy = 0,
+			width = object.width,
+			height = object.height,
+			rotation = object.rotation,
+			health = object.health,
+			attack = object.attack,
+			behaivor = object.behaivor,
+			onCollision = object.onCollision,
+			onDeath = object.onDeath,
+			draw = object.draw,
+			isEnemy = object.isEnemy,
+			forwardFace = object.forwardFace,
+			movementFrames = object.movementFrames
+		}
+	end
 	if (object.isNPC) then
 		Heartbeat.entities[#Heartbeat.entities].isNPC = true
 	end
@@ -130,7 +142,7 @@ end
 function Heartbeat.drawEntities()
 	for i=1,#Heartbeat.entities do
 		if (Heartbeat.entities[i].draw ~= nil) then
-			Heartbeat.entities[i].draw()
+			Heartbeat.entities[i].draw(Heartbeat.entities[i])
 		else
 			Heartbeat.draw(Heartbeat.entities[i])
 		end
@@ -146,7 +158,29 @@ function Heartbeat.doEntities()
 				entity.behaivor(entity)
 			end
 			entity.dy = entity.dy + Heartbeat.gravity
-			Heartbeat.checkCollisions(entity)
+			local collidedObject = Heartbeat.checkCollisions(entity)
+			if (collidedObject ~= nil and entity.onCollision ~= nil) then
+				entity.onCollision(entity, collidedObject)
+			end
+		end
+	end
+	Heartbeat.player.cooldownFrames = Heartbeat.player.cooldownFrames - 1
+end
+
+function Heartbeat.updateEntityHealth(this, value)
+	if (value <= 0) then
+		if (this.onDeath ~= nil) then
+			this.onDeath(this)
+		end
+		Heartbeat.removeEntity(this)
+	end
+	this.health = value
+end
+
+function Heartbeat.removeEntity(entity)
+	for i=1,#Heartbeat.entities do
+		if (entity == Heartbeat.entities[i]) then
+			table.remove(Heartbeat.entities, i)
 		end
 	end
 end
@@ -156,7 +190,7 @@ function Heartbeat.newTile(object, x, y)
 	local isNewTile = true
 	for i=1,#Heartbeat.tiles do
 		-- If tile currently exists, set isNewTile to false
-		if (Heartbeat.tiles[i].x == x and Heartbeat.tiles[i].y == y and Heartbeat.tiles[i].id == Heartbeat.editor.currentTile) then
+		if (Heartbeat.tiles[i].x == x and Heartbeat.tiles[i].y == y) then
 			isNewTile = false
 		end
 	end
@@ -167,7 +201,12 @@ function Heartbeat.newTile(object, x, y)
 			y = y,
 			width = object.width,
 			height = object.height,
-			texture = object.texture
+			texture = object.texture,
+			scaleX = object.scaleX,
+			scaleY = object.scaleY,
+			offsetX = object.offsetX,
+			offsetY = object.offsetY,
+			isSolid = object.isSolid
 		}
 	end
 end
@@ -179,17 +218,37 @@ function Heartbeat.drawTiles()
 	end
 end
 
+function Heartbeat.removeTile(tile)
+	for i=1,#Heartbeat.tiles do
+		if (tile == Heartbeat.tiles[i]) then
+			table.remove(Heartbeat.tiles, i)
+		end
+	end
+end
+
 function Heartbeat.newItem(object, x, y)
-	Heartbeat.items[#Heartbeat.items+1] = {
-		id = object.id,
-		x = x,
-		y = y,
-		dx = 0,
-		dy = 0,
-		width = object.width,
-		height = object.height,
-		onPickup = object.onPickup
-	}
+	local isNewItem = true
+	for i=1,#Heartbeat.items do
+		-- If tile currently exists, set isNewTile to false
+		if (Heartbeat.items[i].x == x and Heartbeat.items[i].y == y) then
+			isNewItem = false
+		end
+	end
+	if (isNewItem) then
+		Heartbeat.items[#Heartbeat.items+1] = {
+			id = object.id,
+			x = x,
+			y = y,
+			dx = 0,
+			dy = 0,
+			width = object.width,
+			height = object.height,
+			texture = object.texture,
+			scaleX = object.scaleX,
+			scaleY = object.scaleY,
+			onPickup = object.onPickup
+		}
+	end
 end
 
 function Heartbeat.drawItems()
@@ -238,6 +297,24 @@ function Heartbeat.player.hasInventoryItem(item)
 	end
 end
 
+function Heartbeat.player.updateHealth(value)
+	if (Heartbeat.player.cooldownFrames <= 0 and not Heartbeat.dialog.isOpen) then
+		if (value <= 0) then
+			Heartbeat.player.killPlayer()
+		end
+		Heartbeat.player.health = value
+		Heartbeat.player.cooldownFrames = 30
+	end
+end
+
+function Heartbeat.player.killPlayer()
+	print("You died, try again.")
+	--love.event.quit()
+	if (Player.onDeath ~= nil) then
+		Player.onDeath()
+	end
+end
+
 function Heartbeat.lookupTile(id)
 	for i=1,#Heartbeat.tilesList do
 		if (id == Heartbeat.tilesList[i].id) then
@@ -262,7 +339,10 @@ function Heartbeat.lookupItem(id)
 	end
 end
 
-function Heartbeat.dialog.openDialog(dialog)
+function Heartbeat.dialog.openDialog(dialog, afterFunc)
+	if (afterFunc ~= nil) then
+		Heartbeat.dialog.afterFunc = afterFunc
+	end
 	if (not Heartbeat.dialog.isOpen) then
 		-- Load the speech file and split it
 		local rawDialog = love.filesystem.read("dialog/" .. dialog .. ".txt")
@@ -279,10 +359,14 @@ end
 function Heartbeat.dialog.nextLine()
 	Heartbeat.dialog.currentLine = Heartbeat.dialog.dialogLines[Heartbeat.dialog.dialogIndex+1]
 	Heartbeat.dialog.dialogCharacter = 0
+	Heartbeat.dialog.printedLines = {}
 	Heartbeat.dialog.dialogIndex = Heartbeat.dialog.dialogIndex + 1
 	-- Out of bounds check
-	if (Heartbeat.dialog.currentLine == nil) then
+	if (Heartbeat.dialog.currentLine == nil or Heartbeat.dialog.currentLine == "") then
 		Heartbeat.dialog.isOpen = false
+		if (Heartbeat.dialog.afterFunc ~= nil) then
+			Heartbeat.dialog.afterFunc()
+		end
 		return
 	end
 
@@ -307,9 +391,22 @@ function Heartbeat.dialog.nextLine()
 end
 
 function Heartbeat.dialog.drawDialog()
+	-- Drawing background
+	love.graphics.setColor(0, 0, .5, .8)
+	love.graphics.rectangle("fill", 0, windowHeight - 150, windowWidth, 150)
+	love.graphics.rectangle("fill", 0, windowHeight - 180, 100, 30)
+	-- Drawing outline
 	love.graphics.setColor(0, 0, 1, .8)
 	love.graphics.rectangle("line", 0, windowHeight - 150, windowWidth, 150)
-	love.graphics.setColor(1, 1, 1, 1)
+	love.graphics.rectangle("line", 0, windowHeight - 180, 100, 30)
+	-- Drawing speaker
+	if (Heartbeat.redText == nil) then
+		love.graphics.setColor(1, 1, 1, 1)
+	else
+		love.graphics.setColor(1, 0, 0, 1)
+	end
+	love.graphics.print(Heartbeat.dialog.speaker, Heartbeat.dialog.font, 0, windowHeight - 180)
+	-- Creating text lines
 	local firstLine = string.sub(Heartbeat.dialog.currentLine, 0, Heartbeat.dialog.dialogCharacter)
 	local previousLength = 0
 	if (Heartbeat.dialog.printedLines[#Heartbeat.dialog.printedLines] ~= nil) then
@@ -317,33 +414,37 @@ function Heartbeat.dialog.drawDialog()
 			previousLength = previousLength + string.len(Heartbeat.dialog.printedLines[i])
 		end
 	end
-	if (Heartbeat.dialog.font:getWidth(string.sub(Heartbeat.dialog.currentLine, previousLength, previousLength + Heartbeat.dialog.dialogCharacter)) > windowWidth - 25) then
-		Heartbeat.dialog.printedLines[#Heartbeat.dialog.printedLines+1] = string.sub(Heartbeat.dialog.currentLine, previousLength, previousLength + Heartbeat.dialog.dialogCharacter)
+	if (Heartbeat.dialog.font:getWidth(string.sub(Heartbeat.dialog.currentLine, previousLength, previousLength + Heartbeat.dialog.dialogCharacter)) > windowWidth - 200) then
+		Heartbeat.dialog.printedLines[#Heartbeat.dialog.printedLines+1] = string.sub(Heartbeat.dialog.currentLine, previousLength + 1, previousLength + Heartbeat.dialog.dialogCharacter)
 		Heartbeat.dialog.dialogCharacter = 0
 	else
 		Heartbeat.dialog.dialogCharacter = Heartbeat.dialog.dialogCharacter + 1
 	end
+	-- Print all lines
 	for i=1,#Heartbeat.dialog.printedLines do
 		if (i == #Heartbeat.dialog.printedLines) then
-			love.graphics.print(string.sub(Heartbeat.dialog.currentLine, previousLength, previousLength + Heartbeat.dialog.dialogCharacter), Heartbeat.dialog.font, 10, windowHeight - 150 + (i*20))
+			love.graphics.print(string.sub(Heartbeat.dialog.currentLine, previousLength + 1, previousLength + Heartbeat.dialog.dialogCharacter), Heartbeat.dialog.font, 100, windowHeight - 150 + (i*30))
 		end
-		love.graphics.print(Heartbeat.dialog.printedLines[i], Heartbeat.dialog.font, 10, windowHeight - 150 + ((i-1)*20))
+		-- Print the in-progress line
+		love.graphics.print(Heartbeat.dialog.printedLines[i], Heartbeat.dialog.font, 100, windowHeight - 150 + ((i-1)*30))
 	end
+	-- Fallback for if there's only one line
 	if (#Heartbeat.dialog.printedLines == 0) then
-		love.graphics.print(firstLine, Heartbeat.dialog.font, 10, windowHeight - 150)
+		love.graphics.print(firstLine, Heartbeat.dialog.font, 100, windowHeight - 150)
 	end
 end
 
 function Heartbeat.editor.drawEditor()
+	Heartbeat.debugLine = "\n\n\n"
 	if (Heartbeat.editor.isActive) then
 		if (Heartbeat.editor.mode == "tile") then
-			Heartbeat.debugLine = "Current Tile: " .. Heartbeat.lookupTile(Heartbeat.editor.currentTile).id .. "\n"
+			Heartbeat.debugLine = Heartbeat.debugLine .. "Current Tile: " .. Heartbeat.tilesList[Heartbeat.editor.currentTile].id .. "\n"
 		elseif (Heartbeat.editor.mode == "entity") then
-			Heartbeat.debugLine = "Current Entity: " .. Heartbeat.lookupEntity(Heartbeat.editor.currentEntity).id .. "\n"
+			Heartbeat.debugLine = Heartbeat.debugLine .. "Current Entity: " .. Heartbeat.entitiesList[Heartbeat.editor.currentEntity].id .. "\n"
 		elseif (Heartbeat.editor.mode == "item") then
-			Heartbeat.debugLine = "Current Item: " .. Heartbeat.lookupItem(Heartbeat.editor.currentItem).id .. "\n"
+			Heartbeat.debugLine = Heartbeat.debugLine .. "Current Item: " .. Heartbeat.itemsList[Heartbeat.editor.currentItem].id .. "\n"
 		end
-		Heartbeat.debugLine = Heartbeat.debugLine .. "Mouse Position: " .. love.mouse.getX() .. " " .. love.mouse.getY() .. "\n"
+		Heartbeat.debugLine = Heartbeat.debugLine .. "Mouse Position: " .. love.mouse.getX() + Camera.x .. " " .. love.mouse.getY() + Camera.y .. "\n"
 		-- Drawing current tile/entity/item info
 		love.graphics.setColor(1, 1, 1, 1)
 		love.graphics.print(Heartbeat.debugLine)
@@ -385,16 +486,16 @@ function Heartbeat.editor.handleInput(key)
 		local snapx = math.floor((love.mouse.getX() + Camera.x) / 25) * 25
 		local snapy = math.floor((love.mouse.getY() + Camera.y) / 25) * 25
 		if (Heartbeat.editor.mode == "tile") then
-			local tileInfo = Heartbeat.lookupTile(Heartbeat.editor.currentTile)
+			local tileInfo = Heartbeat.tilesList[Heartbeat.editor.currentTile]
 			Heartbeat.newTile(tileInfo, snapx, snapy)
 		end
 		if (Heartbeat.editor.mode == "entity") then
-			local entityInfo = Heartbeat.lookupEntity(Heartbeat.editor.currentEntity)
-			Heartbeat.newEntity(entityInfo, love.mouse.getX(), love.mouse.getY())
+			local entityInfo = Heartbeat.entitiesList[Heartbeat.editor.currentEntity]
+			Heartbeat.newEntity(entityInfo, love.mouse.getX() + Camera.x, love.mouse.getY() + Camera.y)
 		end
 		if (Heartbeat.editor.mode == "item") then
-			local itemInfo = Heartbeat.lookupItem(Heartbeat.editor.currentItem)
-			Heartbeat.newItem(itemInfo, love.mouse.getX(), love.mouse.getY())
+			local itemInfo = Heartbeat.itemsList[Heartbeat.editor.currentItem]
+			Heartbeat.newItem(itemInfo, love.mouse.getX() + Camera.x, love.mouse.getY() + Camera.y)
 		end
 	end
 	-- Handle right mouse click, remove tile
@@ -412,8 +513,8 @@ function Heartbeat.editor.handleInput(key)
 		end
 		if (Heartbeat.editor.mode == "entity") then
 			local mouseHitbox = {
-				x = love.mouse.getX(),
-				y = love.mouse.getY(),
+				x = love.mouse.getX() + Camera.x,
+				y = love.mouse.getY() + Camera.y,
 				width = 1,
 				height = 1,
 			}
@@ -426,8 +527,8 @@ function Heartbeat.editor.handleInput(key)
 		end
 		if (Heartbeat.editor.mode == "item") then
 			local mouseHitbox = {
-				x = love.mouse.getX(),
-				y = love.mouse.getY(),
+				x = love.mouse.getX() + Camera.x,
+				y = love.mouse.getY() + Camera.y,
 				width = 1,
 				height = 1,
 			}
@@ -454,6 +555,28 @@ function Heartbeat.editor.handleInput(key)
 			Heartbeat.editor.mode = "entity"
 		end
 	end
+	if (key == "left") then
+		if (Heartbeat.editor.mode == "tile" and Heartbeat.editor.currentTile > 1) then
+			Heartbeat.editor.currentTile = Heartbeat.editor.currentTile -1
+		end
+		if (Heartbeat.editor.mode == "entity" and Heartbeat.editor.currentEntity > 1) then
+			Heartbeat.editor.currentEntity = Heartbeat.editor.currentEntity -1
+		end
+		if (Heartbeat.editor.mode == "item" and Heartbeat.editor.currentItem > 1) then
+			Heartbeat.editor.currentItem = Heartbeat.editor.currentItem - 1
+		end
+	end
+	if (key == "right") then
+		if (Heartbeat.editor.mode == "tile" and Heartbeat.editor.currentTile < #Heartbeat.tilesList) then
+			Heartbeat.editor.currentTile = Heartbeat.editor.currentTile + 1
+		end
+		if (Heartbeat.editor.mode == "entity" and Heartbeat.editor.currentEntity < #Heartbeat.entitiesList) then
+			Heartbeat.editor.currentEntity = Heartbeat.editor.currentEntity + 1
+		end
+		if (Heartbeat.editor.mode == "item" and Heartbeat.editor.currentItem < #Heartbeat.itemsList) then
+			Heartbeat.editor.currentItem = Heartbeat.editor.currentItem + 1
+		end
+	end
 	-- Enable command mode, for saving/reading
 	if (key == ";") then
 		Heartbeat.editor.commandMode = true
@@ -467,6 +590,10 @@ function Heartbeat.editor.executeCommand()
 			print("Error: No level name defined.\n Usage: :w <filename>")
 		else
 			local args = split(Heartbeat.editor.commandModeLine, " ")
+			if (args[2] == nil or args[2] == "") then
+				print("Error: No level name defined.\n Usage: :w <filename>")
+				return
+			end
 			Heartbeat.editor.saveLevel(args[2])
 		end
 	-- :o <filename> (reads level from file)
@@ -476,21 +603,30 @@ function Heartbeat.editor.executeCommand()
 			local args = split(Heartbeat.editor.commandModeLine, " ")
 			Heartbeat.editor.readLevel(args[2])
 		end
-	-- :set <height/width> (sets level height/width)
+	-- :set <dimension> <value> (sets level height/width)
 	elseif (Heartbeat.editor.commandModeLine:sub(1, 3) == "set") then
 		local args = split(Heartbeat.editor.commandModeLine, " ")
 		if (args[2] == "height") then
-			Heartbeat.levelHeight = args[3]
+			Heartbeat.levelHeight = tonumber(args[3])
 			print("Level height set to " .. args[3])
 		elseif (args[2] == "width") then
-			Heartbeat.levelWidth = args[3]
+			Heartbeat.levelWidth = tonumber(args[3])
 			print("Level width set to " .. args[3])
+		elseif (args[2] == "x") then
+			Heartbeat.player.x = tonumber(args[3])
+			print("Player x set to " .. args[3])
+		elseif (args[2] == "y") then
+			Heartbeat.player.y = tonumber(args[3])
+			print("Player y set to " .. args[3])
 		else
 			print("Error: Invalid arguments.\nUsage: set <variable> <value>")
 		end
-	-- :room <roomfilename> <doorX> <doorY> <newroomX> <newroomY> (Creates a new door in a level)
+	-- :room <destinationroom> <doorX> <doorY> <newroomX> <newroomY> (Creates a new door in a level)
 	elseif (Heartbeat.editor.commandModeLine:sub(1, 4) == "room") then
 		local args = split(Heartbeat.editor.commandModeLine, " ")
+		if (args[6] == nil) then
+			print("Usage: :room <destination> <doorX> <doorY> <newroomX> <newroomY>")
+		end
 		Heartbeat.rooms[#Heartbeat.rooms+1] = {
 			location = args[2],
 			x = tonumber(args[3]),
@@ -531,6 +667,11 @@ function Heartbeat.editor.saveLevel(levelName)
 	for i=1,#Heartbeat.entities do
 		love.filesystem.append(levelName, Heartbeat.entities[i].x .. " " .. Heartbeat.entities[i].y .. " " .. Heartbeat.entities[i].id .. "\n")
 	end
+	-- Write the items to the file
+	love.filesystem.append(levelName, "ITEMS\n")
+	for i=1,#Heartbeat.items do
+		love.filesystem.append(levelName, Heartbeat.items[i].x .. " " .. Heartbeat.items[i].y .. " " .. Heartbeat.items[i].id .. "\n")
+	end
 	-- Print success message
 	print("Written '" .. levelName .. "' to file.")
 end
@@ -554,7 +695,8 @@ function Heartbeat.editor.readLevel(levelName)
 	local levelLineData
 	local i = 3 -- For door loop (line 1 is dimensions, 2 is a title, so 3 is where we start)
 	local j = 0 -- For tile loop
-	local k = 0 -- For item loop
+	local k = 0 -- For entity loop
+	local l = 0 -- For item loop
 
 	-- Load the doors
 	for i=i,#levelLines do
@@ -563,8 +705,7 @@ function Heartbeat.editor.readLevel(levelName)
 			break
 		end
 		levelLineData = split(levelLines[i], " ")
-		Heartbeat.rooms = {}
-		Heartbeat.rooms[#Level.rooms+1] = {x = tonumber(levelLineData[1]), y = tonumber(levelLineData[2]), location = levelLineData[3], newX = tonumber(levelLineData[4]), newY = tonumber(levelLineData[5])}
+		Heartbeat.rooms[#Heartbeat.rooms+1] = {x = tonumber(levelLineData[1]), y = tonumber(levelLineData[2]), location = levelLineData[3], newX = tonumber(levelLineData[4]), newY = tonumber(levelLineData[5])}
 	end
 
 	-- Load the tiles
@@ -578,30 +719,75 @@ function Heartbeat.editor.readLevel(levelName)
 		local tileData = {
 			id = tile.id,
 			width = tile.width,
-			height = tile.height
+			height = tile.height,
+			texture = tile.texture,
+			scaleX = tile.scaleX,
+			scaleY = tile.scaleY,
+			offsetX = tile.offsetX,
+			offsetY = tile.offsetY,
+			isSolid = tile.isSolid
 		}
+		-- Exceptions used to go here
 		Heartbeat.newTile(tileData, tonumber(levelLineData[1]), tonumber(levelLineData[2]))
-		--Heartbeat.tiles[Level.tileCount+1] = {x = tonumber(levelLineData[1]), y = tonumber(levelLineData[2]), id = tonumber(levelLineData[3])}
 	end
 
 	-- Load the entities
-	for k=k,#levelLines-1 do -- -1 to avoid EOF
-		--if (levelLines[i] == "ITEMS") then
-			--l = k
-			--break
-		--end
+	for k=k,#levelLines do -- -1 to avoid EOF
+		if (levelLines[k] == "ITEMS") then
+			l = k+1
+			break
+		end
 		levelLineData = split(levelLines[k], " ")
 		local entity = Heartbeat.lookupEntity(levelLineData[3])
 		local entityData = {
 			id = entity.id,
+			texture = entity.texture,
 			height = entity.height,
 			width = entity.width,
 			health = entity.health,
-			attack = entity.attack
+			attack = entity.attack,
+			draw = entity.draw,
+			behaivor = entity.behaivor,
+			onDeath = entity.onDeath,
+			isEnemy = entity.isEnemy,
+			onCollision = entity.onCollision,
+			moveLeft = entity.moveleft,
+			opacity = entity.opacity,
+			movementFrames = entity.movementFrames
 		}
-		Heartbeat.newEntity(entityData, tonumber(levelLineData[1]), tonumber(levelLineData[2]))
-		--Heartbeat.spawnEntity(tonumber(levelLineData[1]), tonumber(levelLineData[2]), tonumber(levelLineData[3]))
+		if (not (levelName == "cave10" and Player.flags.hasKilledFrog)) then
+			Heartbeat.newEntity(entityData, tonumber(levelLineData[1]), tonumber(levelLineData[2]))
+		end
 	end
+	-- Load the items
+	for l=l,#levelLines-1 do
+		levelLineData = split(levelLines[l], " ")
+		local item = Heartbeat.lookupItem(levelLineData[3])
+		local itemData = {
+			id = item.id,
+			height = item.height,
+			width = item.width,
+			onPickup = item.onPickup,
+			texture = item.texture,
+			scaleX = item.scaleX,
+			scaleY = item.scaleY,
+			draw = item.draw
+		}
+
+		if (
+			not (levelName == "bunker5" and Player.flags.hasFirstMatter) and
+			not (levelName == "bunker6" and Player.flags.hasFirstHealth) and
+			not (levelName == "cave3" and Player.flags.hasSecondMatter) and
+			not (levelName == "cave4" and Player.flags.hasSecondHealth) and
+			not (levelName == "cave6" and Player.flags.hasThirdMatter) and
+			not (levelName == "spider3" and Player.flags.hasThirdHealth) and
+			not (levelName == "spider7" and Player.flags.hasFourthMatter)
+		) then
+			Heartbeat.newItem(itemData, tonumber(levelLineData[1]), tonumber(levelLineData[2]))
+		end
+	end
+
+	Heartbeat.levelName = levelName
 	print("Loaded '" .. levelName .. "' successfully.")
 end
 
@@ -609,17 +795,30 @@ end
 function Heartbeat.clear()
 	Heartbeat.tiles = {}
 	Heartbeat.entities = {}
+	Heartbeat.items = {}
+	Heartbeat.rooms = {}
 end
 
 function Heartbeat.checkRooms()
 	for i=1,#Heartbeat.rooms do
-		if ((Heartbeat.player.x >= Heartbeat.rooms[i].x and Heartbeat.player.x <= Heartbeat.rooms[i].x + 25) and Heartbeat.player.y == Heartbeat.rooms[i].y) then
+		if (Heartbeat.rooms[i] == nil) then return end -- Room changing duct tape
+		if ((Heartbeat.player.x >= Heartbeat.rooms[i].x and Heartbeat.player.x <= Heartbeat.rooms[i].x + 25) and Heartbeat.player.y + Heartbeat.player.width >= Heartbeat.rooms[i].y and Heartbeat.player.y <= Heartbeat.rooms[i].y + 25) then
 			Heartbeat.gotoRoom(Heartbeat.rooms[i].location, Heartbeat.rooms[i].newX, Heartbeat.rooms[i].newY)
 		end
 	end
 end
 
 function Heartbeat.gotoRoom(room, x, y)
+	--if ((string.sub(room, 1, 1) == "s" or string.sub(room, 1, 1) == "b" or Heartbeat.levelName == "end") and Sounds.currentTheme ~= Sounds.bunker_theme) then
+		--love.audio.stop()
+		--love.audio.play(Sounds.bunker_theme)
+		--Sounds.currentTheme = Sounds.bunker_theme
+	--end
+	--if ((string.sub(room, 1, 1) == "c") and Sounds.currentTheme ~= Sounds.cave_theme) then
+		--love.audio.stop()
+		--love.audio.play(Sounds.cave_theme)
+		--Sounds.currentTheme = Sounds.cave_theme
+	--end
 	print("Room " .. room .. " loaded.")
 	Heartbeat.clear()
 	Heartbeat.editor.readLevel(room)
@@ -633,15 +832,20 @@ function Heartbeat.checkCollisions(entity)
 	local attemptedY = entity.y + entity.dy
 	local collisionX = false
 	local collisionY = false
+	local collidedObject = nil
 
 	for i=1,#Heartbeat.tiles do
-		if (entity.x < Heartbeat.tiles[i].x + Heartbeat.tiles[i].width and entity.x + entity.width > Heartbeat.tiles[i].x and attemptedY < Heartbeat.tiles[i].y + Heartbeat.tiles[i].height and attemptedY + entity.height > Heartbeat.tiles[i].y) then
-			entity.dy = 0
-			entity.isFalling = false
-			collisionY = true
-		end
-		if (attemptedX < Heartbeat.tiles[i].x + Heartbeat.tiles[i].width and attemptedX + entity.width > Heartbeat.tiles[i].x and entity.y < Heartbeat.tiles[i].y + Heartbeat.tiles[i].height and entity.y + entity.height > Heartbeat.tiles[i].y) then
-			collisionX = true
+		if (Heartbeat.tiles[i].isSolid) then
+			if (entity.x < Heartbeat.tiles[i].x + Heartbeat.tiles[i].width and entity.x + entity.width > Heartbeat.tiles[i].x and attemptedY < Heartbeat.tiles[i].y + Heartbeat.tiles[i].height and attemptedY + entity.height > Heartbeat.tiles[i].y) then
+				entity.dy = 0
+				entity.isFalling = false
+				collisionY = true
+				collidedObject = Heartbeat.tiles[i]
+			end
+			if (attemptedX < Heartbeat.tiles[i].x + Heartbeat.tiles[i].width and attemptedX + entity.width > Heartbeat.tiles[i].x and entity.y < Heartbeat.tiles[i].y + Heartbeat.tiles[i].height and entity.y + entity.height > Heartbeat.tiles[i].y) then
+				collisionX = true
+				collidedObject = Heartbeat.tiles[i]
+			end
 		end
 	end
 
@@ -652,6 +856,9 @@ function Heartbeat.checkCollisions(entity)
 	if (not collisionX) then
 		entity.x = entity.x + entity.dx
 	end
+
+	-- Return a bool if they collided
+	return collidedObject
 end
 
 -- checkEntityCollisons: Compares two entities, returns true if they collide
@@ -665,16 +872,41 @@ function Heartbeat.checkEntityCollision(entity1, entity2)
 	end
 end
 
+function Heartbeat.getTile(x, y)
+	local checker = {
+		x = x,
+		y = y,
+		width = 1,
+		height = 1
+	}
+
+	for i=1,#Heartbeat.tiles do
+		if (Heartbeat.checkEntityCollision(Heartbeat.tiles[i], checker)) then
+			return Heartbeat.tiles[i]
+		end
+	end
+
+	return nil
+end
+
 -- setDimensions: Sets the dimensions of the level
 function Heartbeat.setDimensions(width, height)
 	Heartbeat.levelWidth = width
 	Heartbeat.levelHeight = height
 end
 
+function Heartbeat.setBackgroundColor(red, green, blue)
+	Heartbeat.backgroundRed = red
+	Heartbeat.backgroundGreen = green
+	Heartbeat.backgroundBlue = blue
+end
+
 -- drawBackground: Draws the background, currently supports only solid colors
 function Heartbeat.drawBackground()
-	love.graphics.setColor(0, 0, 0, 1)
-	love.graphics.rectangle("fill", 0, 0, windowWidth, windowHeight)
+	if (Heartbeat.backgroundRed ~= nil) then
+		love.graphics.setColor(Heartbeat.backgroundRed, Heartbeat.backgroundBlue, Heartbeat.backgroundGreen, 1)
+		love.graphics.rectangle("fill", 0, 0, windowWidth, windowHeight)
+	end
 end
 
 -- Heartbeat's main function
@@ -690,6 +922,7 @@ function Heartbeat.beat()
 	Heartbeat.drawItems()
 	Heartbeat.drawPlayer()
 	Heartbeat.editor.drawEditor()
+	Camera.update()
 	if (Heartbeat.dialog.isOpen) then
 		Heartbeat.dialog.drawDialog()
 	end

@@ -7,8 +7,8 @@ Camera = {
 
 -- Add x and y directions
 function Camera.update()
-	Camera.x = Player.x - windowWidth / 2
-	Camera.y = Player.y - windowHeight / 2
+	Camera.x = Heartbeat.player.x - (windowWidth / 2)
+	Camera.y = Heartbeat.player.y - (windowHeight / 2)
 	-- Checking the bounds of the level
 	if (Camera.x < 0) then
 		Camera.x = 0
@@ -16,10 +16,10 @@ function Camera.update()
 	if (Camera.y < 0) then
 		Camera.y = 0
 	end
-	if (Camera.x > (Level.width - windowWidth)) then
+	if (Camera.x > (Heartbeat.levelWidth - windowWidth)) then
 		Camera.x = Heartbeat.levelWidth - windowWidth
 	end
-	if (Camera.y > (Level.height - windowHeight)) then
+	if (Camera.y > (Heartbeat.levelHeight - windowHeight)) then
 		Camera.y = Heartbeat.levelHeight - windowHeight
 	end
 end
