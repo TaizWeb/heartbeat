@@ -1,0 +1,14 @@
+[MM]
+This should be the first line,\n This should be the second line, This should be the third line, This should be the fourth line, This should be the first line, This should be the first line, I'm supposed to speak a bit?  This should be the first line,\n This should be the second line, This should be the third line, This should be the fourth line, This should be the first line, This should be the first line, I'm supposed to speak a bit?  This should be the first line,\n This should be the second line, This should be the third line, This should be the fourth line, This should be the first line, This should be the first line, I'm supposed to speak a bit?  This should be the first line,\n This should be the second line, This should be the third line, This should be the fourth line, This should be the first line, This should be the first line, I'm supposed to speak a bit?  This should be the first line,\n This should be the second line, This should be the third line, This should be the fourth line, This should be the first line, This should be the first line, I'm supposed to speak a bit?  This should be the first line,\n This should be the second line, This should be the third line, This should be the fourth line, This should be the first line, This should be the first line, I'm supposed to speak a bit?
+Each line is a box of dialog.
+
+[MC]
+And the box up top?
+
+[MM]
+It tells the program who's speaking.
+The idea is that we split it by \n
+Then we loop through
+If it's a [], we load the portrait
+If not, and the line ain't empty
+We load the text into the box!
