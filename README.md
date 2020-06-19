@@ -23,7 +23,7 @@ At the time of this writing, Heartbeat currently targets lua 5.3 and love2d 11.1
 
 **Can I use this in my game?**
 
-Of course. Heartbeat is licensed under MIT, meaning you can do whatever you want with it, even package it with games to sell.
+Of course. Heartbeat is licensed under zlib, meaning you can do whatever you want with it, even package it with games to sell. For more information on the specifics, refer to the LICENSE file in the root of the repository.
 
 **Could you add X to Heartbeat?**
 
