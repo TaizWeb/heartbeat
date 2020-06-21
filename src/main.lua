@@ -12,7 +12,7 @@ function love.load()
 	Heartbeat.newItem(Brick, 100, 200)
 	Heartbeat.editor.isActive = true
 	-- Perhaps add a thing to heartbeat to catalog? Maybe not because editor
-	Heartbeat.tilesList = {Stone}
+	Heartbeat.tilesList = {Stone, Platform}
 	Heartbeat.entitiesList = {Zombie}
 	Heartbeat.itemsList = {Brick}
 	Heartbeat.dialog.speakers = {"MM", "MC"}
@@ -60,7 +60,15 @@ end
 Stone = {
 	id = "stone",
 	width = 25,
-	height = 25
+	height = 25,
+	isSolid = true
+}
+
+Platform = {
+	id = "platform",
+	width = 25,
+	height = 10,
+	isPlatform = true
 }
 
 function love.keypressed(key, scancode, isrepeat)
@@ -73,6 +81,9 @@ function love.keypressed(key, scancode, isrepeat)
 	if (Heartbeat.editor.isActive) then
 		Heartbeat.editor.handleInput(key)
 	end
+	if (key == "z") then
+		Heartbeat.jump(Heartbeat.player)
+	end
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
@@ -82,7 +93,17 @@ function love.mousepressed(x, y, button, istouch, presses)
 end
 
 function love.update(dt)
-
+	if (love.keyboard.isDown("left")) then
+		Heartbeat.player.dx = -5
+		Heartbeat.player.isCrouched = false
+		Heartbeat.player.isUp = false
+	elseif (love.keyboard.isDown("right")) then
+		Heartbeat.player.dx = 5
+		Heartbeat.player.isCrouched = false
+		Heartbeat.player.isUp = false
+	else
+		Heartbeat.player.dx = 0
+	end
 end
 
 function love.draw()

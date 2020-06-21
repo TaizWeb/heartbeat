@@ -206,7 +206,8 @@ function Heartbeat.newTile(object, x, y)
 			scaleY = object.scaleY,
 			offsetX = object.offsetX,
 			offsetY = object.offsetY,
-			isSolid = object.isSolid
+			isSolid = object.isSolid,
+			isPlatform = object.isPlatform
 		}
 	end
 end
@@ -725,7 +726,8 @@ function Heartbeat.editor.readLevel(levelName)
 			scaleY = tile.scaleY,
 			offsetX = tile.offsetX,
 			offsetY = tile.offsetY,
-			isSolid = tile.isSolid
+			isSolid = tile.isSolid,
+			isPlatform = tile.isPlatform
 		}
 		-- Exceptions used to go here
 		Heartbeat.newTile(tileData, tonumber(levelLineData[1]), tonumber(levelLineData[2]))
@@ -835,7 +837,7 @@ function Heartbeat.checkCollisions(entity)
 	local collidedObject = nil
 
 	for i=1,#Heartbeat.tiles do
-		if (Heartbeat.tiles[i].isSolid) then
+		if (Heartbeat.tiles[i].isSolid or (Heartbeat.tiles[i].isPlatform and ((Heartbeat.player.y + Heartbeat.player.height) <= Heartbeat.tiles[i].y))) then
 			if (entity.x < Heartbeat.tiles[i].x + Heartbeat.tiles[i].width and entity.x + entity.width > Heartbeat.tiles[i].x and attemptedY < Heartbeat.tiles[i].y + Heartbeat.tiles[i].height and attemptedY + entity.height > Heartbeat.tiles[i].y) then
 				entity.dy = 0
 				entity.isFalling = false
