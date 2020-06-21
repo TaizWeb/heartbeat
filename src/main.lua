@@ -12,12 +12,13 @@ function love.load()
 	Heartbeat.newItem(Brick, 100, 200)
 	Heartbeat.editor.isActive = true
 	-- Perhaps add a thing to heartbeat to catalog? Maybe not because editor
-	Heartbeat.tilesList = {Stone, Platform}
+	Heartbeat.tilesList = {Stone, Platform, Slope}
 	Heartbeat.entitiesList = {Zombie}
 	Heartbeat.itemsList = {Brick}
 	Heartbeat.dialog.speakers = {"MM", "MC"}
 	Heartbeat.levelWidth = windowWidth
 	Heartbeat.levelHeight = windowHeight
+	Heartbeat.editor.readLevel("test")
 end
 
 Editor = {}
@@ -69,6 +70,13 @@ Platform = {
 	width = 25,
 	height = 10,
 	isPlatform = true
+}
+
+Slope = {
+	id = "slope",
+	width = 25,
+	height = 25,
+	isSlope = true
 }
 
 function love.keypressed(key, scancode, isrepeat)

@@ -207,7 +207,8 @@ function Heartbeat.newTile(object, x, y)
 			offsetX = object.offsetX,
 			offsetY = object.offsetY,
 			isSolid = object.isSolid,
-			isPlatform = object.isPlatform
+			isPlatform = object.isPlatform,
+			isSlope = object.isSlope
 		}
 	end
 end
@@ -727,7 +728,8 @@ function Heartbeat.editor.readLevel(levelName)
 			offsetX = tile.offsetX,
 			offsetY = tile.offsetY,
 			isSolid = tile.isSolid,
-			isPlatform = tile.isPlatform
+			isPlatform = tile.isPlatform,
+			isSlope = tile.isSlope
 		}
 		-- Exceptions used to go here
 		Heartbeat.newTile(tileData, tonumber(levelLineData[1]), tonumber(levelLineData[2]))
@@ -835,8 +837,10 @@ function Heartbeat.checkCollisions(entity)
 	local collisionX = false
 	local collisionY = false
 	local collidedObject = nil
+	-- TODO: Rewrite this to just use checkEntityCollision
 
 	for i=1,#Heartbeat.tiles do
+		--if (Heartbeat.tiles[i].isSolid or (not Heartbeat.tiles[i].isSlope) or (Heartbeat.tiles[i].isPlatform and ((Heartbeat.player.y + Heartbeat.player.height) <= Heartbeat.tiles[i].y))) then
 		if (Heartbeat.tiles[i].isSolid or (Heartbeat.tiles[i].isPlatform and ((Heartbeat.player.y + Heartbeat.player.height) <= Heartbeat.tiles[i].y))) then
 			if (entity.x < Heartbeat.tiles[i].x + Heartbeat.tiles[i].width and entity.x + entity.width > Heartbeat.tiles[i].x and attemptedY < Heartbeat.tiles[i].y + Heartbeat.tiles[i].height and attemptedY + entity.height > Heartbeat.tiles[i].y) then
 				entity.dy = 0
@@ -847,6 +851,14 @@ function Heartbeat.checkCollisions(entity)
 			if (attemptedX < Heartbeat.tiles[i].x + Heartbeat.tiles[i].width and attemptedX + entity.width > Heartbeat.tiles[i].x and entity.y < Heartbeat.tiles[i].y + Heartbeat.tiles[i].height and entity.y + entity.height > Heartbeat.tiles[i].y) then
 				collisionX = true
 				collidedObject = Heartbeat.tiles[i]
+			end
+		end
+		if (Heartbeat.tiles[i].isSlope and Heartbeat.checkEntityCollision(Heartbeat.tiles[i], Heartbeat.player)) then
+			if (Heartbeat.player.dx ~= 0) then
+				entity.dy = -1 * Heartbeat.player.dx
+				entity.isFalling = false
+			else
+				entity.dy = 0
 			end
 		end
 	end
