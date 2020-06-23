@@ -95,7 +95,7 @@ end
 
 function Heartbeat.jump(entity)
 	if (not entity.isFalling) then
-		entity.dy = -11
+		entity.dy = entity.dy -11
 		entity.isFalling = true
 	end
 end
@@ -853,9 +853,43 @@ function Heartbeat.checkCollisions(entity)
 				collidedObject = Heartbeat.tiles[i]
 			end
 		end
+
+		-- Slope handling
 		if (Heartbeat.tiles[i].isSlope and Heartbeat.checkEntityCollision(Heartbeat.tiles[i], Heartbeat.player)) then
+			-- Rewrite
+			--local playerX = (Heartbeat.tiles[i].x + Heartbeat.tiles[i].width) - (Heartbeat.player.x + Heartbeat.player.width * .5)
+			---- Seems the 1's polarity is different for the direction
+			--Heartbeat.player.y = (1 * playerX) + Heartbeat.tiles[i].y - Heartbeat.tiles[i].height
+			--Heartbeat.player.dy = 0
+
+			-- Old
 			if (Heartbeat.player.dx ~= 0) then
-				entity.dy = -1 * Heartbeat.player.dx
+				local leftCheck = {
+					x = Heartbeat.player.x - 1,
+					y = Heartbeat.player.y,
+					height = Heartbeat.player.height,
+					width = 1
+				}
+				local rightCheck = {
+					x = Heartbeat.player.x + Heartbeat.player.width + 1,
+					y = Heartbeat.player.y,
+					height = Heartbeat.player.height,
+					width = 1
+				}
+				if (Heartbeat.checkEntityCollision(leftCheck, Heartbeat.tiles[i])) then
+					-- Right slope
+					if ((Heartbeat.player.y + Heartbeat.player.height) >= (Heartbeat.tiles[i].y + (Heartbeat.tiles[i].width/2))) then
+						Heartbeat.player.y = Heartbeat.tiles[i].y - Heartbeat.player.height + (Heartbeat.tiles[i].width/2)
+					end
+					entity.dy = Heartbeat.player.dx
+				end
+				if (Heartbeat.checkEntityCollision(rightCheck, Heartbeat.tiles[i])) then
+					-- Left slope
+					if ((Heartbeat.player.y + Heartbeat.player.height) >= (Heartbeat.tiles[i].y + (Heartbeat.tiles[i].width/2))) then
+						Heartbeat.player.y = Heartbeat.tiles[i].y - Heartbeat.player.height + (Heartbeat.tiles[i].width/2)
+					end
+					entity.dy = -1 * Heartbeat.player.dx
+				end
 				entity.isFalling = false
 			else
 				entity.dy = 0
