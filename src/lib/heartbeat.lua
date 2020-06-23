@@ -437,14 +437,18 @@ function Heartbeat.dialog.drawDialog()
 end
 
 function Heartbeat.editor.drawEditor()
+	local currentObject
 	Heartbeat.debugLine = "\n\n\n"
 	if (Heartbeat.editor.isActive) then
 		if (Heartbeat.editor.mode == "tile") then
 			Heartbeat.debugLine = Heartbeat.debugLine .. "Current Tile: " .. Heartbeat.tilesList[Heartbeat.editor.currentTile].id .. "\n"
+			currentObject = Heartbeat.lookupTile(Heartbeat.tilesList[Heartbeat.editor.currentTile].id)
 		elseif (Heartbeat.editor.mode == "entity") then
 			Heartbeat.debugLine = Heartbeat.debugLine .. "Current Entity: " .. Heartbeat.entitiesList[Heartbeat.editor.currentEntity].id .. "\n"
+			currentObject = Heartbeat.lookupEntity(Heartbeat.entitiesList[Heartbeat.editor.currentEntity].id)
 		elseif (Heartbeat.editor.mode == "item") then
 			Heartbeat.debugLine = Heartbeat.debugLine .. "Current Item: " .. Heartbeat.itemsList[Heartbeat.editor.currentItem].id .. "\n"
+			currentObject = Heartbeat.lookupItem(Heartbeat.itemsList[Heartbeat.editor.currentItem].id)
 		end
 		Heartbeat.debugLine = Heartbeat.debugLine .. "Mouse Position: " .. love.mouse.getX() + Camera.x .. " " .. love.mouse.getY() + Camera.y .. "\n"
 		-- Drawing current tile/entity/item info
@@ -457,7 +461,24 @@ function Heartbeat.editor.drawEditor()
 		end
 		-- Drawing the cursor
 		love.graphics.setColor(1, 1, 1, .5)
-		love.graphics.rectangle("fill", math.floor(love.mouse.getX() / 25) * 25, math.floor(love.mouse.getY() / 25) * 25, 25, 25)
+		local objectPreview = {
+			height = currentObject.height,
+			width = currentObject.width,
+			texture = currentObject.texture
+		}
+		if (Heartbeat.editor.mode == "tile") then
+			objectPreview.x = math.floor(love.mouse.getX() / 25) * 25
+			objectPreview.y = math.floor(love.mouse.getY() / 25) * 25
+		else
+			objectPreview.x = love.mouse.getX()
+			objectPreview.y = love.mouse.getY()
+		end
+
+		if (objectPreview.texture ~= nil) then
+			Heartbeat.draw(objectPreview)
+		else
+			love.graphics.rectangle("fill", objectPreview.x, objectPreview.y, objectPreview.width, objectPreview.height)
+		end
 	end
 end
 
