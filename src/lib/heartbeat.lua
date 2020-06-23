@@ -95,7 +95,7 @@ end
 
 function Heartbeat.jump(entity)
 	if (not entity.isFalling) then
-		entity.dy = entity.dy -11
+		entity.dy = -11
 		entity.isFalling = true
 	end
 end
@@ -892,7 +892,10 @@ function Heartbeat.checkCollisions(entity)
 				end
 				entity.isFalling = false
 			else
-				entity.dy = 0
+				-- If the player is falling through the stairs, set their dy to 0
+				if (entity.dy > 0) then
+					entity.dy = 0
+				end
 			end
 		end
 	end
