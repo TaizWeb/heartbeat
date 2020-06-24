@@ -929,6 +929,24 @@ function Heartbeat.checkCollisions(entity)
 		entity.x = entity.x + entity.dx
 	end
 
+	-- A very special case of corner bugs
+	-- I apologize.
+	if (collisionX and collisionY) then
+		-- Upper left corner
+		if (Heartbeat.getTile(Heartbeat.player.x - 1, Heartbeat.player.y - 1) ~= nil) then
+			Heartbeat.player.x = Heartbeat.player.x + 1
+		-- Upper right corner
+		elseif (Heartbeat.getTile(Heartbeat.player.x + Heartbeat.player.width + 1, Heartbeat.player.y - 1) ~= nil) then
+			Heartbeat.player.x = Heartbeat.player.x - 1
+		-- Bottom left corner
+		elseif (Heartbeat.getTile(Heartbeat.player.x - 1, Heartbeat.player.y + Heartbeat.player.height + 1) ~= nil) then
+			Heartbeat.player.y = Heartbeat.player.y - 1
+		-- Bottom right corner
+		elseif (Heartbeat.getTile(Heartbeat.player.x + Heartbeat.player.width + 1, Heartbeat.player.y + Heartbeat.player.height + 1) ~= nil) then
+			Heartbeat.player.y = Heartbeat.player.y - 1
+		end
+	end
+
 	-- Return a bool if they collided
 	return collidedObject
 end
