@@ -8,7 +8,7 @@
 * A level reader/writer
 * A level editor
 * A player inventory manager
-* A dialog framework (in progress)
+* A dialog framework
 * A simple menu system (coming soon)
 
 ## Installation
@@ -31,7 +31,7 @@ Create a new issue and give it the `Enhancement` label and I'll see what I can d
 
 **Is Heartbeat in a usable state?**
 
-Short answer: Yes. Long Answer: It depends on what you define as usable. As of right now, the project is a work in progress, so expect frequent and possibly breaking changes until 1.0.
+Yes. See [Project Proton](https://github.com/taizweb/project-proton) for an example using the engine. Documentation is currently being developed as well.
 
 **Will there be a luarocks package?**
 
