@@ -858,7 +858,6 @@ function Heartbeat.checkCollisions(entity)
 	local collisionX = false
 	local collisionY = false
 	local collidedObject = nil
-	-- TODO: Rewrite this to just use checkEntityCollision
 
 	for i=1,#Heartbeat.tiles do
 		--if (Heartbeat.tiles[i].isSolid or (not Heartbeat.tiles[i].isSlope) or (Heartbeat.tiles[i].isPlatform and ((Heartbeat.player.y + Heartbeat.player.height) <= Heartbeat.tiles[i].y))) then
@@ -877,13 +876,22 @@ function Heartbeat.checkCollisions(entity)
 
 		-- Slope handling
 		if (Heartbeat.tiles[i].isSlope and Heartbeat.checkEntityCollision(Heartbeat.tiles[i], Heartbeat.player)) then
+			--Heartbeat.player.isClimbing = true
 			-- Rewrite
+			-- right slope?
 			--local playerX = (Heartbeat.tiles[i].x + Heartbeat.tiles[i].width) - (Heartbeat.player.x + Heartbeat.player.width * .5)
-			---- Seems the 1's polarity is different for the direction
-			--Heartbeat.player.y = (1 * playerX) + Heartbeat.tiles[i].y - Heartbeat.tiles[i].height
-			--Heartbeat.player.dy = 0
+
+			-- left slope?
+			local playerX = (Heartbeat.player.x + (Heartbeat.player.width * .5)) - (Heartbeat.tiles[i].x + Heartbeat.tiles[i].width)
+
+			-- Seems the 1's polarity is different for the direction
+			Heartbeat.player.y = (-1 * playerX) + (Heartbeat.tiles[i].y - Heartbeat.tiles[i].height)
+			--print(playerX)
+			--print(Heartbeat.player.y)
+			Heartbeat.player.dy = 0
 
 			-- Old
+			--[[
 			if (Heartbeat.player.dx ~= 0) then
 				local leftCheck = {
 					x = Heartbeat.player.x - 1,
@@ -918,6 +926,7 @@ function Heartbeat.checkCollisions(entity)
 					entity.dy = 0
 				end
 			end
+			--]]
 		end
 	end
 
