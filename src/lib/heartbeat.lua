@@ -113,6 +113,7 @@ function Heartbeat.newEntity(object, x, y)
 		Heartbeat.entities[#Heartbeat.entities+1] = {
 			id = object.id,
 			texture = object.texture,
+			textures = object.textures,
 			x = x,
 			y = y,
 			originalX = object.x,
@@ -121,6 +122,8 @@ function Heartbeat.newEntity(object, x, y)
 			dy = 0,
 			width = object.width,
 			height = object.height,
+			scaleX = object.scaleX,
+			scaleY = object.scaleY,
 			rotation = object.rotation,
 			health = object.health,
 			attack = object.attack,
@@ -898,7 +901,6 @@ function Heartbeat.checkCollisions(entity)
 			if (Heartbeat.checkEntityCollision(rightCheck, Heartbeat.tiles[i])) then
 				-- This and 1 seem to work for right slopes
 				local playerX = (Heartbeat.tiles[i].x) - (Heartbeat.player.x + Heartbeat.player.width * .5)
-				-- Seems the 1's polarity is different for the direction
 				Heartbeat.player.y = (1 * playerX) + Heartbeat.tiles[i].y - Heartbeat.tiles[i].height
 			end
 			Heartbeat.player.dy = 0
