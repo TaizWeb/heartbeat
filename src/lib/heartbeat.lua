@@ -788,6 +788,7 @@ function Heartbeat.editor.readLevel(levelName)
 		local entityData = {
 			id = entity.id,
 			texture = entity.texture,
+			textures = entity.textures,
 			height = entity.height,
 			width = entity.width,
 			health = entity.health,
