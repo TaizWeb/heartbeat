@@ -225,12 +225,30 @@ function Heartbeat.drawTiles()
 	end
 end
 
-function Heartbeat.removeTile(tile)
-	for i=1,#Heartbeat.tiles do
-		if (tile == Heartbeat.tiles[i]) then
-			table.remove(Heartbeat.tiles, i)
+-- removeTile: Removes a tile at a specified reference of location
+-- <tile> can be used when you have a direct reference, for example using a onCollision hook
+-- <x/y> can be used when you don't have that but know the coordinates
+function Heartbeat.removeTile(tile, x, y)
+	if (x ~= nil and y ~= nil) then
+		-- Check for x and y
+		for i=1,#Heartbeat.tiles do
+			if (Heartbeat.tiles[i].x == x and Heartbeat.tiles[i].y == y) then
+				table.remove(Heartbeat.tiles, i)
+				return 1
+			end
+		end
+	elseif (tile ~= nil) then
+		-- Check by tile reference
+		for i=1,#Heartbeat.tiles do
+			if (tile == Heartbeat.tiles[i]) then
+				table.remove(Heartbeat.tiles, i)
+				return 1
+			end
 		end
 	end
+
+	-- Why are these two seperate loops? Performance. Rather than do three boolean checks per tile, only do the ones necessary depending on usecase.
+	return 0
 end
 
 function Heartbeat.newItem(object, x, y)
