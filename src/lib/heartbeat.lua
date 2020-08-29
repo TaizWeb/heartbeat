@@ -65,6 +65,8 @@ function Heartbeat.createPlayer(object, x, y)
 	Heartbeat.player.walkFrames = 0
 	Heartbeat.player.jumpFrames = 0
 	Heartbeat.player.jumpCooldown = 0
+	Heartbeat.player.texture = object.texture
+	Heartbeat.player.onDeath = object.onDeath
 	Heartbeat.player.inventory = {}
 	Heartbeat.player.forwardFace = true
 	Heartbeat.player.cooldownFrames = 0
