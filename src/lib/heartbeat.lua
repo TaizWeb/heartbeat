@@ -878,46 +878,30 @@ function Heartbeat.checkCollisions(entity)
 		-- Slope handling
 		if (Heartbeat.tiles[i].isSlope and Heartbeat.checkEntityCollision(Heartbeat.tiles[i], Heartbeat.player)) then
 			-- Rewrite
-			--local playerX = (Heartbeat.tiles[i].x + Heartbeat.tiles[i].width) - (Heartbeat.player.x + Heartbeat.player.width * .5)
-			---- Seems the 1's polarity is different for the direction
-			--Heartbeat.player.y = (1 * playerX) + Heartbeat.tiles[i].y - Heartbeat.tiles[i].height
-			--Heartbeat.player.dy = 0
-
-			-- Old
-			if (Heartbeat.player.dx ~= 0) then
-				local leftCheck = {
-					x = Heartbeat.player.x - 1,
-					y = Heartbeat.player.y,
-					height = Heartbeat.player.height,
-					width = 1
-				}
-				local rightCheck = {
-					x = Heartbeat.player.x + Heartbeat.player.width + 1,
-					y = Heartbeat.player.y,
-					height = Heartbeat.player.height,
-					width = 1
-				}
-				if (Heartbeat.checkEntityCollision(leftCheck, Heartbeat.tiles[i])) then
-					-- Right slope
-					if ((Heartbeat.player.y + Heartbeat.player.height) >= (Heartbeat.tiles[i].y + (Heartbeat.tiles[i].width/2))) then
-						Heartbeat.player.y = Heartbeat.tiles[i].y - Heartbeat.player.height + (Heartbeat.tiles[i].width/2)
-					end
-					entity.dy = Heartbeat.player.dx
-				end
-				if (Heartbeat.checkEntityCollision(rightCheck, Heartbeat.tiles[i])) then
-					-- Left slope
-					if ((Heartbeat.player.y + Heartbeat.player.height) >= (Heartbeat.tiles[i].y + (Heartbeat.tiles[i].width/2))) then
-						Heartbeat.player.y = Heartbeat.tiles[i].y - Heartbeat.player.height + (Heartbeat.tiles[i].width/2)
-					end
-					entity.dy = -1 * Heartbeat.player.dx
-				end
-				entity.isFalling = false
-			else
-				-- If the player is falling through the stairs, set their dy to 0
-				if (entity.dy > 0) then
-					entity.dy = 0
-				end
+			local leftCheck = {
+				x = Heartbeat.player.x,
+				y = Heartbeat.player.y,
+				height = Heartbeat.player.height,
+				width = 1
+			}
+			local rightCheck = {
+				x = Heartbeat.player.x + Heartbeat.player.width,
+				y = Heartbeat.player.y,
+				height = Heartbeat.player.height,
+				width = 1
+			}
+			if (Heartbeat.checkEntityCollision(leftCheck, Heartbeat.tiles[i])) then
+			-- This and -1 seem to work for left slopes
+				local playerX = (Heartbeat.tiles[i].x + Heartbeat.tiles[i].width) - (Heartbeat.player.x + Heartbeat.player.width * .5)
+				Heartbeat.player.y = (-1 * playerX) + Heartbeat.tiles[i].y - Heartbeat.tiles[i].height
 			end
+			if (Heartbeat.checkEntityCollision(rightCheck, Heartbeat.tiles[i])) then
+				-- This and 1 seem to work for right slopes
+				local playerX = (Heartbeat.tiles[i].x) - (Heartbeat.player.x + Heartbeat.player.width * .5)
+				-- Seems the 1's polarity is different for the direction
+				Heartbeat.player.y = (1 * playerX) + Heartbeat.tiles[i].y - Heartbeat.tiles[i].height
+			end
+			Heartbeat.player.dy = 0
 		end
 	end
 
