@@ -271,24 +271,41 @@ function Heartbeat.removeItem(item)
 		end
 	end
 end
-
 function Heartbeat.player.addInventoryItem(item)
+	-- Might remove this later, for now it breaks without it however
 	if (#Heartbeat.player.inventory == 0) then
-		Heartbeat.player.inventory[#Heartbeat.player.inventory+1] = {id = item.id, count = 1}
+		Heartbeat.player.inventory[#Heartbeat.player.inventory+1] = 
+		{
+			id = item.id,
+			name = item.name,
+			desc = item.desc,
+			count = 1
+		}
 		return
 	end
 	local inventoryIndex = Heartbeat.player.hasInventoryItem(item)
 	if (inventoryIndex ~= -1) then
+		-- If the player has the item, increment the count
 		Heartbeat.player.inventory[inventoryIndex].count = Heartbeat.player.inventory[inventoryIndex].count + 1
 	else
-		Heartbeat.player.inventory[#Heartbeat.player.inventory+1].id = item.id
+		-- If not, add it to the inventory
+		Heartbeat.player.inventory[#Heartbeat.player.inventory+1] = {
+			id = item.id,
+			name = item.name,
+			desc = item.desc,
+			count = 1,
+		}
 	end
 end
 
 function Heartbeat.player.removeInventoryItem(item)
 	local inventoryIndex = Heartbeat.player.hasInventoryItem(item)
 	if (inventoryIndex ~= -1) then
-		table.remove(Heartbeat.player.inventory, inventoryIndex)
+		if (Heartbeat.player.inventory[inventoryIndex].count > 1) then
+			Heartbeat.player.inventory[inventoryIndex].count = Heartbeat.player.inventory[inventoryIndex].count - 1
+		else
+			table.remove(Heartbeat.player.inventory, inventoryIndex)
+		end
 	else
 		print("Heartbeat Error: Player has no item of id '" .. item.id .."'")
 	end
@@ -298,10 +315,9 @@ function Heartbeat.player.hasInventoryItem(item)
 	for i=1,#Heartbeat.player.inventory do
 		if (Heartbeat.player.inventory[i].id == item.id) then
 			return i
-		else
-			return -1
 		end
 	end
+	return -1
 end
 
 function Heartbeat.player.updateHealth(value)
