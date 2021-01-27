@@ -717,31 +717,42 @@ end
 
 function Heartbeat.editor.saveLevel(levelName)
 	levelName = "levels/" .. levelName -- Writing levels to the levels directory
+	levelData = Heartbeat.levelWidth .. " " .. Heartbeat.levelHeight .. "\n"
 	-- Creating a file 'levelName' and adding the width/height
-	love.filesystem.write(levelName, Heartbeat.levelWidth .. " " .. Heartbeat.levelHeight .. "\n")
+	--love.filesystem.write(levelName, Heartbeat.levelWidth .. " " .. Heartbeat.levelHeight .. "\n")
 	-- Write the doors to the file
-	love.filesystem.append(levelName, "DOORS\n")
+	levelData = levelData .. "DOORS\n"
+	--love.filesystem.append(levelName, "DOORS\n")
 	for i=1,#Heartbeat.rooms do
-		love.filesystem.append(levelName, Heartbeat.rooms[i].x .. " " .. Heartbeat.rooms[i].y .. " " .. Heartbeat.rooms[i].location .. " " .. Heartbeat.rooms[i].newX .. " " .. Heartbeat.rooms[i].newY .. "\n")
+		levelData = levelData .. Heartbeat.rooms[i].x .. " " .. Heartbeat.rooms[i].y .. " " .. Heartbeat.rooms[i].location .. " " .. Heartbeat.rooms[i].newX .. " " .. Heartbeat.rooms[i].newY .. "\n"
+		--love.filesystem.append(levelName, Heartbeat.rooms[i].x .. " " .. Heartbeat.rooms[i].y .. " " .. Heartbeat.rooms[i].location .. " " .. Heartbeat.rooms[i].newX .. " " .. Heartbeat.rooms[i].newY .. "\n")
 	end
 	-- Write the tiles to the file
-	love.filesystem.append(levelName, "TILES\n")
+	levelData = levelData .. "TILES\n"
+	--love.filesystem.append(levelName, "TILES\n")
 	for i=1,#Heartbeat.tiles do
-		love.filesystem.append(levelName, Heartbeat.tiles[i].x .. " " .. Heartbeat.tiles[i].y .. " " .. Heartbeat.tiles[i].id .. "\n")
+		levelData = levelData .. Heartbeat.tiles[i].x .. " " .. Heartbeat.tiles[i].y .. " " .. Heartbeat.tiles[i].id .. "\n"
+		--love.filesystem.append(levelName, Heartbeat.tiles[i].x .. " " .. Heartbeat.tiles[i].y .. " " .. Heartbeat.tiles[i].id .. "\n")
 	end
 	-- Write the entities to the file
-	love.filesystem.append(levelName, "ENTITIES\n")
+	levelData = levelData .. "ENTITIES\n"
+	--love.filesystem.append(levelName, "ENTITIES\n")
 	for i=1,#Heartbeat.entities do
-		love.filesystem.append(levelName, Heartbeat.entities[i].x .. " " .. Heartbeat.entities[i].y .. " " .. Heartbeat.entities[i].id .. "\n")
+		levelData = levelData .. Heartbeat.entities[i].x .. " " .. Heartbeat.entities[i].y .. " " .. Heartbeat.entities[i].id .. "\n"
+		--love.filesystem.append(levelName, Heartbeat.entities[i].x .. " " .. Heartbeat.entities[i].y .. " " .. Heartbeat.entities[i].id .. "\n")
 	end
 	-- Write the items to the file
-	love.filesystem.append(levelName, "ITEMS\n")
+	levelData = levelData .. "ITEMS\n"
+	--love.filesystem.append(levelName, "ITEMS\n")
 	for i=1,#Heartbeat.items do
-		love.filesystem.append(levelName, Heartbeat.items[i].x .. " " .. Heartbeat.items[i].y .. " " .. Heartbeat.items[i].id .. "\n")
+		levelData = levelData .. Heartbeat.items[i].x .. " " .. Heartbeat.items[i].y .. " " .. Heartbeat.items[i].id .. "\n"
+		--love.filesystem.append(levelName, Heartbeat.items[i].x .. " " .. Heartbeat.items[i].y .. " " .. Heartbeat.items[i].id .. "\n")
 	end
 	-- Print success message
+	love.filesystem.write(levelName, levelData)
 	print("Written '" .. levelName .. "' to file.")
 end
+
 
 function Heartbeat.editor.readLevel(levelName)
 	local rawLevelData = love.filesystem.read("levels/" .. levelName)
